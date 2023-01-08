@@ -1,3 +1,4 @@
+#include <stido.h>
 
 int main() {
     char a[][16] = { "ibm             ", "dec             ", "dos             ", "vax             " };
@@ -5,6 +6,7 @@ int main() {
         for (int j = 0; j < 3; j++) {
             a[i][j] &= 0b11011111;
         }
+        printf("%s\n", a[i][j]);
     }
     return 0;
 }
