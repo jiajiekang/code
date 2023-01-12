@@ -1,11 +1,9 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
 #define MAX_NR_OF_LINES 5000
-#define DEFAULT_NR_OF_LINES_TO_PRINT 10
 
 #define MAX_LINE_LEN 1000
 #define ALLOC_SIZE 10000
@@ -18,61 +16,75 @@ void afree(char *ptr);
 
 size_t get_line(char line[], size_t max_line_len);
 
-int is_str_uint(char *str);
-int is_arg_list_valid(int argc, char *argv[]);
+int parse_arg_list(int argc, char *argv[]);
 
 size_t read_lines(char *line_ptr[], const size_t max_nr_of_lines);
-void write_lines(char *line_ptr[], const size_t nr_of_lines_to_print, const size_t total_nr_of_lines);
+void write_lines(char *line_ptr[], const size_t nr_of_lines);
+
+int numcmp(const char *s1, const char *s2);
+int estrcmp(const char *s1, const char *s2);
+void swap(void *v[], size_t i, size_t j);
+void quick_sort(void *v[], size_t start, size_t end, int (*comp)(void *, void *));
+
+int order = 1; // 1 ascendent, -1 descendent
+int (*comp)(const char *, const char *) = estrcmp;
 
 int main(int argc, char *argv[])
 {
-  if (!is_arg_list_valid(argc, argv))
+  if (!parse_arg_list(argc, argv))
   {
-    puts("Error: invalid arguments.\n");
+    puts("Error: invalid arguments.");
     return EXIT_FAILURE;
   }
 
-  size_t nr_of_lines_to_print = DEFAULT_NR_OF_LINES_TO_PRINT;
-
-  if (argc == 2)
-  {
-    nr_of_lines_to_print = atoi(argv[argc - 1] + 1);
-  }
-
-  size_t total_nr_of_lines;
+  size_t nr_of_lines;
   char *line_ptr[MAX_NR_OF_LINES];
 
-  if ((total_nr_of_lines = read_lines(line_ptr, MAX_NR_OF_LINES)) != -1)
+  if ((nr_of_lines = read_lines(line_ptr, MAX_NR_OF_LINES)) != -1)
   {
-    write_lines(line_ptr, nr_of_lines_to_print, total_nr_of_lines);
+    quick_sort((void **)line_ptr, 0, nr_of_lines - 1, (int (*)(void *, void *))comp);
+    write_lines(line_ptr, nr_of_lines);
   }
   else
   {
-    puts("Error: input too large.\n");
+    puts("Error: input too large.");
     return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;
 }
 
-int is_str_uint(char *str)
+int parse_arg_list(int argc, char *argv[])
 {
-  for (size_t i = 0; i < strlen(str); ++i)
+  for (int i = 1; i < argc; ++i)
   {
-    if (!isdigit(str[i]))
+    size_t arg_len = strlen(argv[i]);
+    if (arg_len > 1 && argv[i][0] == '-')
+    {
+      for (size_t j = 1; j < arg_len; ++j)
+      {
+        switch (argv[i][j])
+        {
+        case 'n':
+          comp = numcmp;
+          break;
+
+        case 'r':
+          order = -1;
+          break;
+
+        default:
+          return 0;
+          break;
+        }
+      }
+    }
+    else
     {
       return 0;
     }
   }
-  return 1;
-}
 
-int is_arg_list_valid(int argc, char *argv[])
-{
-  if (argc > 2 || (argc == 2 && (argv[argc - 1][0] != '-' || !is_str_uint(argv[argc - 1] + 1))))
-  {
-    return 0;
-  }
   return 1;
 }
 
@@ -124,20 +136,66 @@ size_t read_lines(char *line_ptr[], const size_t max_nr_of_lines)
   return nr_of_lines;
 }
 
-void write_lines(char *line_ptr[], const size_t nr_of_lines_to_print, const size_t total_nr_of_lines)
+void write_lines(char *line_ptr[], const size_t nr_of_lines)
 {
-  size_t start_pos = 0;
-
-  if (total_nr_of_lines >= nr_of_lines_to_print)
-  {
-    start_pos = total_nr_of_lines - nr_of_lines_to_print;
-  }
-
-  for (size_t i = start_pos; i < total_nr_of_lines; ++i)
+  for (size_t i = 0; i < nr_of_lines; ++i)
   {
     puts(line_ptr[i]);
     afree(line_ptr[i]);
   }
+}
+
+int numcmp(const char *s1, const char *s2)
+{
+  double nr1 = atof(s1);
+  double nr2 = atof(s2);
+
+  if (nr1 < nr2)
+  {
+    return order * -1;
+  }
+  else if (nr1 > nr2)
+  {
+    return order * 1;
+  }
+
+  return 0;
+}
+
+int estrcmp(const char *s1, const char *s2)
+{
+  return order * strcmp(s1, s2);
+}
+
+void swap(void *v[], size_t i, size_t j)
+{
+  void *temp;
+  temp = v[i];
+  v[i] = v[j];
+  v[j] = temp;
+}
+
+void quick_sort(void *v[], size_t start, size_t end, int (*comp)(void *, void *))
+{
+  if ((long)start >= (long)end)
+  {
+    return;
+  }
+
+  swap(v, start, (start + end) / 2);
+
+  size_t last = start;
+  for (size_t i = start + 1; i <= end; ++i)
+  {
+    if ((*comp)(v[i], v[start]) < 0)
+    {
+      swap(v, ++last, i);
+    }
+  }
+
+  swap(v, start, last);
+  quick_sort(v, start, last - 1, comp);
+  quick_sort(v, last + 1, end, comp);
 }
 
 char *alloc(size_t size)
@@ -159,4 +217,4 @@ void afree(char *ptr)
   }
 }
 
-// NOTE: run: ./tail -5 < file_in.txt
+// NOTE: run: ./sort -nr < file_in.txt
