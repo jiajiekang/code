@@ -41,35 +41,43 @@ use Data::Dump qw(dump);
 #
 # print $sepline;
 #
-$record = {
-    NAME => "Jason",
-    EMPNO => 132,
-    TITLE => "deputy peon",
-    AGE => 23,
-    SALARY => 37_000,
-    PALS => [ "Norbert", "Rhys", "Phineas"],
+# $record = {
+#     NAME => "Jason",
+#     EMPNO => 132,
+#     TITLE => "deputy peon",
+#     AGE => 23,
+#     SALARY => 37_000,
+#     PALS => [ "Norbert", "Rhys", "Phineas"],
+# };
+#
+# use Clone 'clone';
+# $record_1 = clone($record);
+# @Array_of_Records = ($record, $record_1);
+#
+# for $record (@Array_of_Records) {
+#     for $key (sort keys %$record) {
+#         print "$key: $record->{$key}\n";
+#     }
+#     print "\n"
+# };
+#
+# {
+#     local $/="";
+#     $ARGV[0] = 'records.txt';
+#     @Array_of_Records = ();
+#     while(<>) {
+#         my @fields = split /^([^:]+):\s*/m;
+#         shift @fields;
+#         push @Array_of_Records, {map /(.*)/, @fields};
+#     }
+#     print dump @Array_of_Records;
+# };
+
+use Dumpvalue;
+Dumpvalue->new->dumpvars("main", "INC");
+
+$func = sub {
+    print "Hello\n";
 };
-
-use Clone 'clone';
-$record_1 = clone($record);
-@Array_of_Records = ($record, $record_1);
-
-for $record (@Array_of_Records) {
-    for $key (sort keys %$record) {
-        print "$key: $record->{$key}\n";
-    }
-    print "\n"
-};
-
-{
-    local $/="";
-    $ARGV[0] = 'records.txt';
-    @Array_of_Records = ();
-    while(<>) {
-        my @fields = split /^([^:]+):\s*/m;
-        shift @fields;
-        push @Array_of_Records, {map /(.*)/, @fields};
-    }
-    print dump @Array_of_Records;
-};
-
+use Data::Dumper;
+print Dumper $func;
