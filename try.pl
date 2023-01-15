@@ -73,11 +73,15 @@ use Data::Dump qw(dump);
 #     print dump @Array_of_Records;
 # };
 
-use Dumpvalue;
-Dumpvalue->new->dumpvars("main", "INC");
+# use Dumpvalue;
+# Dumpvalue->new->dumpvars("main", "INC");
+# 
+# $func = sub {
+# print "Hello\n";
+# };
+# use Data::Dumper;
+# print Dumper $func;
 
-$func = sub {
-    print "Hello\n";
-};
-use Data::Dumper;
-print Dumper $func;
+use open qw(:utf8 :std);
+print "\xC4 and \x{0394} look different\n";
+
