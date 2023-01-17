@@ -75,13 +75,54 @@ use Data::Dump qw(dump);
 
 # use Dumpvalue;
 # Dumpvalue->new->dumpvars("main", "INC");
-# 
+#
 # $func = sub {
 # print "Hello\n";
 # };
 # use Data::Dumper;
 # print Dumper $func;
 
-use open qw(:utf8 :std);
-print "\xC4 and \x{0394} look different\n";
+# use open qw(:utf8 :std);
+# print "\xC4 and \x{0394} look different\n";
 
+# $data = "ABCDEabc1111111122222222Hello";
+# ($leading, $s1, $s2, $trailing) = unpack "A5 x3 A8 A8 A*", $data;
+# print("leading: $leading, s1: $s1, s2: $s2, trailing: $trailing \n");
+
+# $string = "This is what you have";
+# substr( $string, 5, 2 ) = "wasn't";     # change "is" to "wasn't"
+# substr( $string, -12 )  = "ondrous";    # "This wasn't wondrous"
+# substr( $string, 0, 1 ) = "";           # delete first character
+# substr( $string, -10 )  = "";           # delete last 10 characters
+
+# # you can test substrings with =~
+# if ( substr( $string, -10 ) =~ /pattern/ ) {
+#   print "Pattern matches in last 10 characters\n";
+# }
+# substr($string, 0, 5) =~ s/is/at/g;
+# print $string;
+
+# $c = 5;
+# $a = $b || $c;
+# print "$a\n";
+
+# $unistr = pack("U4",0x24b6,0x24b7,0x24b8,0x24b9);
+# @unichars = unpack("U*", $unistr);
+# printf "%#x, " x @unichars, @unichars;
+
+# $hal  = "HAL";
+# @byte = unpack( "C*", $hal );
+# foreach $val (@byte) {
+#   $val ^= 0b00100000;  # add one to each byte value
+#   $val ^= 0b00100000;
+# }
+# $ibm = pack( "C*", @byte );
+# print "$ibm\n";    # prints "IBM"
+
+# @unicode_points = unpack( "U*", "fac\x{0327}ade" );
+# print "@unicode_points\n";
+# $word = pack( "U*", @unicode_points );
+# print "$word\n";
+
+printf "%#vd\n", "fac\x{0327}ade";
+printf "%#vx\n", "fac\x{0327}ade";
