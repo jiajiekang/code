@@ -82,7 +82,8 @@ use Data::Dump qw(dump);
 # use Data::Dumper;
 # print Dumper $func;
 
-# use open qw(:utf8 :std);
+use open qw(:utf8 :std);
+
 # print "\xC4 and \x{0394} look different\n";
 
 # $data = "ABCDEabc1111111122222222Hello";
@@ -124,5 +125,38 @@ use Data::Dump qw(dump);
 # $word = pack( "U*", @unicode_points );
 # print "$word\n";
 
-printf "%#vd\n", "fac\x{0327}ade";
-printf "%#vx\n", "fac\x{0327}ade";
+# printf "%#vd\n", "fac\x{0327}ade";
+# printf "%#vx\n", "fac\x{0327}print "\N{GREEK CAPITAL LETTER DELTA} is called delta.\n";ade";
+
+# use charnames qw(:full :short greek Cyrillic);
+# print "\N{GREEK CAPITAL LETTER DELTA} is called delta.\n";
+# print "\N{greek:Delta} is an upper-case delta.\n";
+# print "\N{Sigma} and \N{sigma} are Greek sigmas.\n";
+# print "\N{Be} and \N{be} are Cyrillic bes.\n";
+
+# use charnames qw(:full);
+# for $code ( 0xc4, 0x394 ) {
+#   printf "character u+%04x (%s) is named %s\n", $code, chr($code),
+#     charnames::viacode($code);
+# }
+# $name = "music sharp sign";
+# $code = charnames::vianame($name);
+# printf "%s is character u+%04x (%s)\n", $name, $code, chr($code);
+
+# use bytes;
+# $string = "an apple a day";
+# foreach $char ( unpack( 'C*', $string ) ) {
+#   printf "%s has charactors %#04x\n", chr($char), ord $char;
+#   printf "octbytes: %d\n", bytes::length($char);
+# }
+
+$string = "an apple a day";
+$sum = 0;
+foreach $byteval ( unpack( "C*", $string ) ) {
+  $sum += $byteval;
+}
+$sum = unpack("%16C*", $string);
+use Digest::MD5 qw(md5);
+$sum = md5($string);
+print "sum is $sum\n";
+
