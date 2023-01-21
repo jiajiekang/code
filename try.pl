@@ -87,8 +87,8 @@ use open qw(:utf8 :std);
 # print "\xC4 and \x{0394} look different\n";
 
 # $data = "ABCDEabc1111111122222222Hello";
-# ($leading, $s1, $s2, $trailing) = unpack "A5 x3 A8 A8 A*", $data;
-# print("leading: $leading, s1: $s1, s2: $s2, trailing: $trailing \n");
+# ($leading, $s1, $s2, $strailing) = unpack "A5 x3 A8 A8 A*", $data;
+# print("leading: $leading, s1: $s1, s2: $s2, trailing: $strailing \n");
 
 # $string = "This is what you have";
 # substr( $string, 5, 2 ) = "wasn't";     # change "is" to "wasn't"
@@ -150,13 +150,58 @@ use open qw(:utf8 :std);
 #   printf "octbytes: %d\n", bytes::length($char);
 # }
 
-$string = "an apple a day";
-$sum = 0;
-foreach $byteval ( unpack( "C*", $string ) ) {
-  $sum += $byteval;
-}
-$sum = unpack("%16C*", $string);
-use Digest::MD5 qw(md5);
-$sum = md5($string);
-print "sum is $sum\n";
+# $string = "an apple a day";
+# $sum = 0;
+# foreach $byteval ( unpack( "C*", $string ) ) {
+#   $sum += $byteval;
+# }
+# $sum = unpack("%16C*", $string);
+# use Digest::MD5 qw(md5);
+# $sum = md5($string);
+# print "sum is $sum\n";
+
+# $string = "fac\x{0327}ade"; # "façade"
+# $string =~ /fa.ade/; # fails
+# $string =~ /fa\Xade/; # succeeds
+# @chars = split(//, $string); # 7 letters in @chars
+# @chars = $string =~ /(.)/g; # same thing
+# print scalar @chars;
+# @chars = $string =~ /(\X)/g; # 6 "letters" in @chars
+# print "\n";
+# print scalar @chars;
+
+# for $word ( "anne\x{301}e", "nin\x{303}o" ) {
+#   printf "%s simple reversed to %s\n", $word, scalar reverse $word;
+#   printf "%s better reversed to %s\n", $word,
+#     join( "", reverse $word =~ /\X/g );
+# }
+
+# use Unicode::Normalize;
+# $s1 = "fa\x{E7}ade";
+# $s2 = "fac\x{0327}ade";
+# if (NFD($s1) eq NFD($s2)) { print "Yup!\n" }
+
+use Unicode::Normalize;
+
+$string = v231.780;
+# LATIN SMALL LETTER C WITH CEDILLA
+# COMBINING CARON
+print "String: $string\n";
+print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
+print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
+
+$string = v99.807.780;
+# LATIN SMALL LETTER C
+# COMBINING CARON
+# COMBINING CEDILLA
+print "String: $string\n";
+print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
+print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
+
+$string = "\x{FB00}";
+# LATIN SMALL LETTER C
+# COMBINING CEDILLA
+print "String: $string\n";
+print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
+print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
 
