@@ -1,149 +1,77 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
-#define MAX_TOKEN_LEN 100
-#define MAX_OUT_LEN 1000
+#define MAX_WORD_LEN 100
+#define NR_OF_KEYS sizeof(keytab) / sizeof(keytab[0])
+
+struct key {
+  char *word;
+  int count;
+};
 
 void skip_blanks();
 void skip_comments();
+void skip_chars_between(char start, char end);
+void skip_char_literal();
+void skip_string_literal();
 
-void get_name(char *dest, const size_t max_len);
-int get_next_token(void);
+int get_word(char *word, int max_word_len);
+int bin_search(char *word, struct key arr[], int arr_len);
 
-int is_valid_qualifier(const char *str);
-int is_valid_data_type(const char *str);
-
-void dcl(void);
-void dir_dcl(void);
-void attr_dcl(void);
-
-enum boolean
-{
-  FALSE,
-  TRUE
+struct key keytab[] = {
+    {"auto", 0},   {"break", 0},    {"case", 0},     {"char", 0},
+    {"const", 0},  {"continue", 0}, {"default", 0},  {"do", 0},
+    {"double", 0}, {"else", 0},     {"enum", 0},     {"extern", 0},
+    {"float", 0},  {"for", 0},      {"goto", 0},     {"if", 0},
+    {"int", 0},    {"long", 0},     {"register", 0}, {"return", 0},
+    {"short", 0},  {"signed", 0},   {"size_t", 0},   {"sizeof", 0},
+    {"static", 0}, {"struct", 0},   {"switch", 0},   {"typedef", 0},
+    {"union", 0},  {"unsigned", 0}, {"void", 0},     {"volatile", 0},
+    {"while", 0},
 };
 
-enum token_type
-{
-  NAME,
-  PARENS,
-  BRACKETS,
-  PAREN_OPEN = '(',
-  PAREN_CLOSE = ')',
-  BRACKET_OPEN = '[',
-  BRACKET_CLOSE = ']',
-  ATTR_SEPARATOR = ','
-};
+int main(void) {
+  int n;
+  char word[MAX_WORD_LEN];
 
-size_t line_nr = 0;
-enum boolean Error = FALSE;
-
-int next_token;
-
-char token[MAX_TOKEN_LEN];
-char name[MAX_TOKEN_LEN];
-char data_type[MAX_TOKEN_LEN];
-char out[MAX_OUT_LEN];
-
-char *data_types[] = {
-    "void",
-    "char",
-    "short",
-    "int",
-    "long",
-    "float",
-    "double",
-    "custom_type",
-};
-
-int main(void)
-{
-  while (get_next_token() != EOF)
-  {
-    if (next_token == '\n')
-    {
-      ++line_nr;
-      continue;
-    }
-
-    out[0] = '\0';
-
-    if (is_valid_data_type(token))
-    {
-      strcpy(data_type, token);
-    }
-    else
-    {
-      Error = TRUE;
-      printf("Error: invalid data type '%s' on line %zu.\n", token, line_nr);
-
-      do
-      {
-        get_next_token();
-      } while (next_token != '\n' && next_token != EOF);
-
-      ++line_nr;
-      continue;
-    }
-
-    dcl();
-
-    if (next_token != '\n')
-    {
-      if (next_token == NAME)
-      {
-        printf("Syntax Error: '%s' unexpected on line %zu.\n", token, line_nr);
+  while (get_word(word, MAX_WORD_LEN) != EOF) {
+    if (isalpha(word[0])) {
+      if ((n = bin_search(word, keytab, NR_OF_KEYS)) >= 0) {
+        keytab[n].count++;
       }
-      else
-      {
-        printf("Syntax Error: '%c' unexpected on line %zu.\n", next_token, line_nr);
-      }
-
-      do
-      {
-        get_next_token();
-      } while (next_token != '\n' && next_token != EOF);
     }
-    else if (!Error)
-    {
-      printf("%s:%s %s\n", name, out, data_type);
-    }
+  }
 
-    Error = FALSE;
-    ++line_nr;
+  for (size_t i = 0; i < NR_OF_KEYS; ++i) {
+    if (keytab[i].count) {
+      printf("%4d %s\n", keytab[i].count, keytab[i].word);
+    }
   }
 
   return EXIT_SUCCESS;
 }
 
-void skip_blanks()
-{
+void skip_blanks() {
   int c;
   while (isblank(c = getc(stdin)))
     ;
   ungetc(c, stdin);
 }
 
-void skip_comments()
-{
+void skip_comments() {
   int c = getc(stdin);
-  if (c == '/')
-  {
+  if (c == '/') {
     c = getc(stdin);
-    if (c == '/')
-    {
+    if (c == '/') {
       while ((c = getc(stdin)) != '\n' && c != EOF)
         ;
-    }
-    else if (c == '*')
-    {
+    } else if (c == '*') {
       while ((c = getc(stdin)) != '*' && c != EOF)
         ;
       c = getc(stdin);
-      if (c == '/')
-      {
+      if (c == '/') {
         ungetc('\n', stdin);
         return;
       }
@@ -152,224 +80,72 @@ void skip_comments()
   ungetc(c, stdin);
 }
 
-void get_name(char *dest, const size_t max_len)
-{
-  int c;
-  size_t i = 0;
-  while ((isalnum(c = getc(stdin)) || c == '_') && i < max_len)
-  {
-    dest[i++] = c;
+void skip_chars_between(char start, char end) {
+  int c = getc(stdin);
+  if (c == start) {
+    while ((c = getc(stdin)) != EOF) {
+      if (c == '\\') {
+        if ((c = getc(stdin)) == EOF) {
+          break;
+        }
+      } else if (c == end) {
+        return;
+      }
+    }
   }
-  dest[i] = '\0';
   ungetc(c, stdin);
 }
 
-int get_next_token(void)
-{
+void skip_char_literal(void) { skip_chars_between('\'', '\''); }
+
+void skip_string_literal(void) { skip_chars_between('"', '"'); }
+
+int get_word(char *word, int max_word_len) {
   skip_blanks();
   skip_comments();
-  skip_blanks();
+  skip_char_literal();
+  skip_string_literal();
 
   int c = getc(stdin);
-  if (c == '(')
-  {
-    skip_blanks();
+  size_t i = 0;
 
-    c = getc(stdin);
-    if (c == ')')
-    {
-      strcpy(token, "()");
-      return next_token = PARENS;
-    }
-    ungetc(c, stdin);
-
-    return next_token = PAREN_OPEN;
-  }
-  else if (c == '[')
-  {
-    skip_blanks();
-    get_name(token, MAX_TOKEN_LEN);
-    skip_blanks();
-
-    c = getc(stdin);
-    if (c == ']')
-    {
-      return next_token = BRACKETS;
-    }
-    ungetc(c, stdin);
-
-    return next_token = BRACKET_OPEN;
-  }
-  else if (isalpha(c))
-  {
-    ungetc(c, stdin);
-    get_name(token, MAX_TOKEN_LEN);
-    return next_token = NAME;
+  if (c != EOF) {
+    word[i++] = c;
   }
 
-  return next_token = c;
+  if (!isalpha(c) && c != '_') {
+    word[i] = '\0';
+    return c;
+  }
+
+  while ((isalnum(c = getc(stdin)) || c == '_') && i < max_word_len) {
+    word[i++] = c;
+  }
+  ungetc(c, stdin);
+  word[i] = '\0';
+
+  return word[0];
 }
 
-int is_valid_qualifier(const char *str)
-{
-  if (strcmp(str, "const") == 0 || strcmp(str, "volatile") == 0)
-  {
-    return TRUE;
+int bin_search(char *word, struct key arr[], int arr_len) {
+  int low = 0;
+  int high = arr_len - 1;
+  int mid;
+
+  while (low <= high) {
+    mid = (low + high) / 2;
+
+    int cond = strcmp(word, arr[mid].word);
+    if (cond < 0) {
+      high = mid - 1;
+    } else if (cond > 0) {
+      low = mid + 1;
+    } else {
+      return mid;
+    }
   }
-  return FALSE;
+
+  return -1;
 }
 
-int is_valid_data_type(const char *str)
-{
-  size_t nr_of_types = sizeof(data_types) / sizeof(data_types[0]);
-  for (size_t i = 0; i < nr_of_types; ++i)
-  {
-    if (strcmp(data_types[i], str) == 0)
-    {
-      return TRUE;
-    }
-  }
-  return FALSE;
-}
-
-void dcl(void)
-{
-  int nr_of_stars = 0;
-  while (get_next_token() == '*')
-  {
-    ++nr_of_stars;
-  }
-
-  dir_dcl();
-
-  while (nr_of_stars--)
-  {
-    strcat(out, " pointer to");
-  }
-}
-
-void dir_dcl(void)
-{
-  if (next_token == PAREN_OPEN)
-  {
-    dcl();
-
-    if (next_token != PAREN_CLOSE)
-    {
-      Error = TRUE;
-      printf("Syntax Error: missing ')' on line %zu.\n", line_nr);
-    }
-  }
-  else if (next_token == NAME)
-  {
-    strcpy(name, token);
-  }
-  else
-  {
-    Error = TRUE;
-    printf("Syntax Error: expected name or (dcl) on line %zu.\n", line_nr);
-  }
-
-  while ((next_token = get_next_token()) == PARENS || next_token == BRACKETS || next_token == PAREN_OPEN)
-  {
-    if (next_token == PAREN_OPEN)
-    {
-      strcat(out, " function expecting");
-      attr_dcl();
-      strcat(out, " and returning");
-
-      if (next_token != PAREN_CLOSE)
-      {
-        Error = TRUE;
-        printf("Syntax Error: missing ')' on line %zu.\n", line_nr);
-
-        if (next_token == '\n')
-        {
-          return;
-        }
-      }
-    }
-    else if (next_token == PARENS)
-    {
-      strcat(out, " function returning");
-    }
-    else if (next_token == BRACKETS)
-    {
-      strcat(out, " array[");
-      strcat(out, token);
-      strcat(out, "] of");
-    }
-  }
-}
-
-void attr_dcl(void)
-{
-  while (get_next_token() != PAREN_CLOSE && next_token != '\n')
-  {
-    if (next_token == ATTR_SEPARATOR)
-    {
-      strcat(out, ",");
-    }
-    else if (next_token == NAME)
-    {
-      if (is_valid_qualifier(token))
-      {
-        strcat(out, " ");
-        strcat(out, token);
-        get_next_token();
-      }
-
-      if (is_valid_data_type(token))
-      {
-        enum boolean is_void_type = FALSE;
-        if (strcmp(token, "void") == 0)
-        {
-          is_void_type = TRUE;
-        }
-
-        strcat(out, " ");
-        strcat(out, token);
-
-        get_next_token();
-        if (next_token == NAME)
-        {
-          if (is_void_type)
-          {
-            printf("Error: variable '%s' has incomplete type 'void' on line %zu.\n", token, line_nr);
-          }
-
-          strcat(out, " ");
-          strcat(out, token);
-        }
-        else if (next_token == PAREN_CLOSE)
-        {
-          if (is_void_type)
-          {
-            return;
-          }
-
-          Error = TRUE;
-          printf("Syntax Error: missing variable name on line %zu.\n", line_nr);
-          return;
-        }
-        else
-        {
-          Error = TRUE;
-          printf("Syntax Error: '%c' unexpected on line %zu.\n", next_token, line_nr);
-        }
-      }
-      else
-      {
-        Error = TRUE;
-        printf("Syntax Error: '%s' unexpected on line %zu.\n", token, line_nr);
-      }
-    }
-    else
-    {
-      Error = TRUE;
-      printf("Syntax Error: '%c' unexpected on line %zu.\n", next_token, line_nr);
-    }
-  }
-}
-
-// NOTE: run: ./dcl < test.txt
+// NOTE: run: ./count_c_keywords < count_c_keywords.c

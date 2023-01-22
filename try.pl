@@ -181,27 +181,39 @@ use open qw(:utf8 :std);
 # $s2 = "fac\x{0327}ade";
 # if (NFD($s1) eq NFD($s2)) { print "Yup!\n" }
 
-use Unicode::Normalize;
+# use Unicode::Normalize;
 
-$string = v231.780;
-# LATIN SMALL LETTER C WITH CEDILLA
-# COMBINING CARON
-print "String: $string\n";
-print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
-print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
+# $string = v231.780;
+# # LATIN SMALL LETTER C WITH CEDILLA
+# # COMBINING CARON
+# print "String: $string\n";
+# print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
+# print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
 
-$string = v99.807.780;
-# LATIN SMALL LETTER C
-# COMBINING CARON
-# COMBINING CEDILLA
-print "String: $string\n";
-print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
-print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
+# $string = v99.807.780;
+# # LATIN SMALL LETTER C
+# # COMBINING CARON
+# # COMBINING CEDILLA
+# print "String: $string\n";
+# print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
+# print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
 
-$string = "\x{FB00}";
-# LATIN SMALL LETTER C
-# COMBINING CEDILLA
-print "String: $string\n";
-print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
-print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
+# $string = "\x{FB00}";
+# # LATIN SMALL LETTER C
+# # COMBINING CEDILLA
+# print "String: $string\n";
+# print "NFD:    ", NFD($string),  ",  NFC: ", NFC($string), "\n";
+# print "KNFD:   ", NFKD($string), ", KNFC: ", NFKC($string), "\n";
+
+# $ff    = "\x{FB00}";     # ff ligature
+# $chars = length($ff);    # length is one character
+# {
+#   use bytes;                # force byte semantics
+#   $octets = length($ff);    # length is two octets
+# }
+# $chars = length;
+
+# use Encode qw(encode_utf8);
+# $ff     = "\x{FB00}";          # ff ligature
+# $ff_oct = encode_utf8($ff);    # convert to octets
 
