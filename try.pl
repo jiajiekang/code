@@ -217,3 +217,11 @@ use open qw(:utf8 :std);
 # $ff     = "\x{FB00}";          # ff ligature
 # $ff_oct = encode_utf8($ff);    # convert to octets
 
+our ( $rows, $cols );
+no strict 'refs';    # for ${$1}/g below
+my $text;
+( $rows, $cols ) = ( 24, 80 );
+$text = q(I am $rows high and $cols long);    # like single quotes!
+$text =~ s/\$(\w+)/${$1}/g;
+print $text;
+
