@@ -3,92 +3,49 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_WORD_LEN 100
-#define NR_OF_TYPES sizeof(data_types) / sizeof(data_types[0])
+#define HASH_SIZE 101
 
-struct tree_node {
-  char *word;
-  struct tree_node *left;
-  struct tree_node *right;
-};
+enum boolean { FALSE, TRUE };
 
 struct list_node {
-  struct tree_node *var_group;
+  char *name;
+  char *definition;
   struct list_node *next;
 };
-
-struct tree_node *add_to_tree(struct tree_node *node_p, char *word);
-void print_tree(struct tree_node *node_p);
-
-struct list_node *add_to_list(struct list_node *list_node_p, char *word);
-void print_list(struct list_node *node_p);
-
-int parse_arg_list(int argc, char *argv[]);
 
 // There is a strdup available with POSIX, but it's not part of ISO C.
 char *str_dup(char *src);
 
-void skip_blanks();
-void skip_comments();
-void skip_chars_between(char start, char end);
-void skip_char_literal(void);
-void skip_string_literal(void);
+size_t hash(char *str);
+struct list_node *lookup(char *str);
+struct list_node *install(char *name, char *definition);
+enum boolean undef(char *name);
 
-int get_word(char *word, int max_word_len);
-int bin_search(char *word, char *arr[], int arr_len);
+static struct list_node *hash_table[HASH_SIZE];
 
-char *data_types[] = {
-    "char", "double", "float", "int", "long", "short", "void",
-};
+int main(void) {
+  install("TEST", "test");
 
-int var_name_str_cmp_len = 6;
+  // Install other collision values for the same hash as for "TEST" -> 51.
+  install("TSHe", "test1");
+  install("UPXD", "test2");
+  install("9iww", "test3");
+  install("mY1a", "test4");
+  install("uuoT", "test5");
 
-int main(int argc, char *argv[]) {
-  if (!parse_arg_list(argc, argv)) {
-    puts("Error: invalid arguments.");
-    return EXIT_FAILURE;
-  }
-
-  int n;
-  struct list_node *list_root = NULL;
-  char word[MAX_WORD_LEN];
-
-  while (get_word(word, MAX_WORD_LEN) != EOF) {
-    if ((n = bin_search(word, data_types, NR_OF_TYPES)) >= 0) {
-      do {
-        // NOTE: This approach takes into consideration both variable and
-        // function names.
-        if (get_word(word, MAX_WORD_LEN) != EOF &&
-            (isalpha(word[0]) || word[0] == '_')) {
-          list_root = add_to_list(list_root, word);
-        }
-      } while (get_word(word, MAX_WORD_LEN) == ',');
+  struct list_node *node_p = lookup("TEST");
+  if (node_p == NULL) {
+    puts("Error: hash value not found.");
+  } else {
+    printf("%s: %s\n", node_p->name, node_p->definition);
+    if (undef("TEST") && lookup("TEST") == NULL) {
+      printf("'%s' was undefined successfully.\n", "TEST");
+    } else {
+      printf("Error: failed to undefine '%s'.\n", "TEST");
     }
   }
-
-  print_list(list_root);
 
   return EXIT_SUCCESS;
-}
-
-int parse_arg_list(int argc, char *argv[]) {
-  if (argc > 2) {
-    return 0;
-  }
-
-  if (argc == 2) {
-    if (!isdigit(argv[1][0])) {
-      return 0;
-    }
-
-    var_name_str_cmp_len = atoi(argv[1]);
-
-    if (var_name_str_cmp_len < 0) {
-      return 0;
-    }
-  }
-
-  return 1;
 }
 
 char *str_dup(char *src) {
@@ -99,149 +56,66 @@ char *str_dup(char *src) {
   return dest;
 }
 
-void skip_blanks() {
-  int c;
-  while (isblank(c = getc(stdin)))
-    ;
-  ungetc(c, stdin);
+size_t hash(char *str) {
+  size_t hash_value = 0;
+  while (*str != '\0') {
+    hash_value = *str + 31 * hash_value;
+    ++str;
+  }
+  return hash_value % HASH_SIZE;
 }
 
-void skip_comments() {
-  int c = getc(stdin);
-  if (c == '/') {
-    c = getc(stdin);
-    if (c == '/') {
-      while ((c = getc(stdin)) != '\n' && c != EOF)
-        ;
-    } else if (c == '*') {
-      while ((c = getc(stdin)) != '*' && c != EOF)
-        ;
-      c = getc(stdin);
-      if (c == '/') {
-        ungetc('\n', stdin);
-        return;
-      }
+struct list_node *lookup(char *str) {
+  struct list_node *node_p;
+  for (node_p = hash_table[hash(str)]; node_p != NULL; node_p = node_p->next) {
+    if (strcmp(str, node_p->name) == 0) {
+      return node_p;
     }
   }
-  ungetc(c, stdin);
+  return NULL;
 }
 
-void skip_chars_between(char start, char end) {
-  int c = getc(stdin);
-  if (c == start) {
-    while ((c = getc(stdin)) != EOF) {
-      if (c == '\\') {
-        if ((c = getc(stdin)) == EOF) {
-          break;
-        }
-      } else if (c == end) {
-        return;
-      }
+struct list_node *install(char *name, char *definition) {
+  struct list_node *node_p;
+  if ((node_p = lookup(name)) == NULL) {
+    node_p = (struct list_node *)malloc(sizeof(*node_p));
+    if (node_p == NULL || (node_p->name = str_dup(name)) == NULL) {
+      return NULL;
     }
-  }
-  ungetc(c, stdin);
-}
-
-void skip_char_literal(void) { skip_chars_between('\'', '\''); }
-
-void skip_string_literal(void) { skip_chars_between('"', '"'); }
-
-int get_word(char *word, int max_word_len) {
-  skip_blanks();
-  skip_comments();
-  skip_char_literal();
-  skip_string_literal();
-
-  int c = getc(stdin);
-  size_t i = 0;
-
-  if (c != EOF) {
-    word[i++] = c;
+    size_t hash_value = hash(name);
+    node_p->next = hash_table[hash_value];
+    hash_table[hash_value] = node_p;
+  } else {
+    free(node_p->definition);
   }
 
-  if (!isalpha(c) && c != '_') {
-    word[i] = '\0';
-    return c;
-  }
-
-  while ((isalnum(c = getc(stdin)) || c == '_') && i < max_word_len) {
-    word[i++] = c;
-  }
-  ungetc(c, stdin);
-  word[i] = '\0';
-
-  return word[0];
-}
-
-int bin_search(char *word, char *arr[], int arr_len) {
-  int low = 0;
-  int high = arr_len - 1;
-  int mid;
-
-  while (low <= high) {
-    mid = (low + high) / 2;
-
-    int cond = strcmp(word, arr[mid]);
-    if (cond < 0) {
-      high = mid - 1;
-    } else if (cond > 0) {
-      low = mid + 1;
-    } else {
-      return mid;
-    }
-  }
-
-  return -1;
-}
-
-struct tree_node *add_to_tree(struct tree_node *node_p, char *word) {
-  int cond;
-
-  if (node_p == NULL) {
-    node_p = (struct tree_node *)malloc(sizeof(struct tree_node));
-    node_p->word = str_dup(word);
-    node_p->left = node_p->right = NULL;
-  } else if ((cond = strcmp(word, node_p->word)) != 0) {
-    if (cond < 0) {
-      node_p->left = add_to_tree(node_p->left, word);
-    } else if (cond > 0) {
-      node_p->right = add_to_tree(node_p->right, word);
-    }
+  if ((node_p->definition = str_dup(definition)) == NULL) {
+    return NULL;
   }
 
   return node_p;
 }
 
-void print_tree(struct tree_node *node_p) {
-  if (node_p != NULL) {
-    print_tree(node_p->left);
-    puts(node_p->word);
-    print_tree(node_p->right);
+enum boolean undef(char *name) {
+  struct list_node *node_p;
+  struct list_node *prev_node_p;
+  size_t hash_value = hash(name);
+  for (node_p = hash_table[hash_value], prev_node_p = NULL; node_p != NULL;
+       prev_node_p = node_p, node_p = node_p->next) {
+    if (strcmp(name, node_p->name) == 0) {
+      free(node_p->name);
+      free(node_p->definition);
+
+      if (prev_node_p == NULL) {
+        hash_table[hash_value] = node_p->next;
+      } else {
+        prev_node_p->next = node_p->next;
+      }
+
+      free(node_p);
+      return TRUE;
+    }
   }
+
+  return FALSE;
 }
-
-struct list_node *add_to_list(struct list_node *list_node_p, char *word) {
-  if (list_node_p == NULL) {
-    list_node_p = (struct list_node *)malloc(sizeof(struct list_node));
-    list_node_p->var_group = NULL;
-    list_node_p->next = NULL;
-    list_node_p->var_group = add_to_tree(list_node_p->var_group, word);
-  } else if (strncmp(list_node_p->var_group->word, word,
-                     var_name_str_cmp_len) == 0) {
-    list_node_p->var_group = add_to_tree(list_node_p->var_group, word);
-  } else {
-    list_node_p->next = add_to_list(list_node_p->next, word);
-  }
-
-  return list_node_p;
-}
-
-void print_list(struct list_node *node_p) {
-  if (node_p != NULL) {
-    print_tree(node_p->var_group);
-    putchar('\n');
-    print_list(node_p->next);
-  }
-}
-
-// NOTE: run: ./var_group 5 < test.txt

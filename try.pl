@@ -217,11 +217,111 @@ use open qw(:utf8 :std);
 # $ff     = "\x{FB00}";          # ff ligature
 # $ff_oct = encode_utf8($ff);    # convert to octets
 
-our ( $rows, $cols );
-no strict 'refs';    # for ${$1}/g below
-my $text;
-( $rows, $cols ) = ( 24, 80 );
-$text = q(I am $rows high and $cols long);    # like single quotes!
-$text =~ s/\$(\w+)/${$1}/g;
-print $text;
+# our ( $rows, $cols );
+# no strict 'refs';    # for ${$1}/g below
+# my $text;
+# ( $rows, $cols ) = ( 24, 80 );
+# $text = q(I am $rows high and $cols long);    # like single quotes!
+# $text =~ s/\$(\w+)/${$1}/g;
+# print $text;
+
+# titlecase each word's first character, lowercase the rest
+# $text = "thIS is a loNG liNE";
+# $text =~ s/(\w+)/\u\L$1/g;
+# print $text;
+
+# randcap: filter to randomly capitalize 20% of the letters
+# call to srand( ) is unnecessary as of v5.4
+# BEGIN { srand(time( ) ^ ($$ + ($$<<15))) }
+# sub randcase { rand(100) < 20 ? "\u\l$_[0]" : "\U$_[0]" }
+# s/(\w+)/randcase($1)/ge;
+
+INIT {
+  our %nocap;
+  for (
+    qw(
+    a an the
+    and but or
+    as at but by for from in into of off on onto per to with
+    )
+    )
+  {
+    $nocap{$_}++;
+  }
+}
+
+# sub tc {
+#   local $_ = shift;
+
+#   # put into lowercase if on stop list, else titlecase
+#   s/(\pL[\pL']*)/$nocap{$1} ? lc($1) : ucfirst(lc($1))/ge;
+#   s/^(\pL[\pL']*) /\u\L$1/x;    # first word guaranteed to cap
+#   s/ (\pL[\pL']*)$/\u\L$1/x;    # last word guaranteed to cap
+
+#   # treat parenthesized portion as a complete title
+#   s/\( (\pL[\pL']*) /(\u\L$1/x;
+#   s/(\pL[\pL']*) \) /\u\L$1)/x;
+
+#   # capitalize first word following colon or semi-colon
+#   s/ ( [:;] \s+ ) (\pL[\pL']* ) /$1\u\L$2/x;
+#   return $_;
+# }
+
+# # with apologies (or kudos) to Stephen Brust, PJF,
+# # and to JRRT, as always.
+# @data = (
+#   "the enchantress of \x{01F3}ur mountain",
+#   "meeting the enchantress of \x{01F3}ur mountain",
+#   "the lord of the rings: the fellowship of the ring",
+# );
+# $mask = "%-20s: %s\n";
+
+# sub tc_lame {
+#   local $_ = shift;
+#   s/(\w+\S*\w*)/\u\L$1/g;
+#   return $_;
+# }
+# for $datum (@data) {
+#   printf $mask, "ALL CAPITALS",     uc($datum);
+#   printf $mask, "no capitals",      lc($datum);
+#   printf $mask, "simple titlecase", tc_lame($datum);
+#   printf $mask, "better titlecase", tc($datum);
+#   print "\n";
+# }
+
+sub dequote {
+  local $_ = shift;
+  my ( $white, $leader );    # common whitespace and common leading string
+  if (/^\s*(?:([^\w\s]+)(\s*).*\n)(?:\s*\1\2?.*\n)+$/) {
+    ( $white, $leader ) = ( $2, quotemeta($1) );
+  }
+  else {
+    ( $white, $leader ) = ( /^(\s+)/, '' );
+  }
+  s/^\s*?$leader(?:$white)?//gm;
+  return $_;
+}
+
+( $definition = << 'FINIS') =~ s/^\s+//gm;
+    The five varieties of camelids
+    are the familiar camel, his friends
+    the llama and the alpaca, and the
+    rather less well-known guanaco
+    and vicuña.
+FINIS
+print "$definition\n";
+
+print dequote $definition;
+
+$poem = dequote <<EVER_ON_AND_ON;
+    Now far ahead the Road has gone,
+      And I must follow, if I can,
+    Pursuing it with eager feet,
+      Until it joins some larger way
+    Where many paths and errands meet.
+      And whither then? I cannot say.
+          --Bilbo in /usr/src/perl/pp_ctl.c
+EVER_ON_AND_ON
+
+print "Here's your poem:\n\n$poem\n";
 
