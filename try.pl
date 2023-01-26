@@ -289,39 +289,112 @@ INIT {
 #   print "\n";
 # }
 
-sub dequote {
-  local $_ = shift;
-  my ( $white, $leader );    # common whitespace and common leading string
-  if (/^\s*(?:([^\w\s]+)(\s*).*\n)(?:\s*\1\2?.*\n)+$/) {
-    ( $white, $leader ) = ( $2, quotemeta($1) );
+# sub dequote {
+#   local $_ = shift;
+#   my ( $white, $leader );    # common whitespace and common leading string
+#   if (/^\s*(?:([^\w\s]+)(\s*).*\n)(?:\s*\1\2?.*\n)+$/) {
+#     ( $white, $leader ) = ( $2, quotemeta($1) );
+#   }
+#   else {
+#     ( $white, $leader ) = ( /^(\s+)/, '' );
+#   }
+#   s/^\s*?$leader(?:$white)?//gm;
+#   return $_;
+# }
+
+# ( $definition = << 'FINIS') =~ s/^\s+//gm;
+#     The five varieties of camelids
+#     are the familiar camel, his friends
+#     the llama and the alpaca, and the
+#     rather less well-known guanaco
+#     and vicuña.
+# FINIS
+# print "$definition\n";
+
+# print dequote $definition;
+
+# $poem = dequote <<EVER_ON_AND_ON;
+#     Now far ahead the Road has gone,
+#       And I must follow, if I can,
+#     Pursuing it with eager feet,
+#       Until it joins some larger way
+#     Where many paths and errands meet.
+#       And whither then? I cannot say.
+#           --Bilbo in /usr/src/perl/pp_ctl.c
+# EVER_ON_AND_ON
+
+# print "Here's your poem:\n\n$poem\n";
+
+# wrapdemo - show how Text::Wrap works
+
+# use Text::Wrap qw($columns &wrap);
+# $columns = 20;
+# print "0123456789" x 2,         "\n";
+# print wrap( "    ", "  ", @input ), "\n";
+
+# use Text::Wrap;
+# undef $/;
+# print wrap('', '', split(/\s*\n\s*/, <>));
+
+# use Text::Wrap    qw(&wrap $columns);
+# use Term::ReadKey qw(GetTerminalSize);
+# ($columns) = GetTerminalSize();
+# ( $/, $\ ) = ( '', "\n\n" );    # read by paragraph, output 2 newlines
+# while (<>) {                    # grab a full paragraph
+#   s/\s*\n\s*/ /g;               # convert intervening newlines to spaces
+#   print wrap( '', '', $_ );     # and format
+# }
+
+# use Text::Autoformat;
+# local $/ = '';
+# while (<>) {
+#   print autoformat( $_, { squeeze => 0, all => 1 } ), "\n";
+# }
+
+# $string = q(Mom said, "Don't do that.");
+# $string =~ s/(['"])/\\$1/g;
+# $string =~ s/(['"])/$1$1/g;
+# print $string;
+
+# $string = "this \Qis a test!\E";
+# $string = "this is\\ a\\ test\\!";
+# $string = "this " . quotemeta("is a test!");
+# print $string;
+
+# use Text::ParseWords;
+
+# sub parse_csv0 {
+#   return quotewords( "," => 0, $_[0] );
+# }
+
+# use Text::CSV;
+
+# sub parse_csv1 {
+#   my $line = shift;
+#   my $csv  = Text::CSV->new();
+#   return $csv->parse($line) && $csv->fields();
+# }
+
+# $line =
+# q(XYZZY,"","O'Reilly, Inc","Wall, Larry","a \"glug\" bit,",5,"Error, Core Dumped");
+# @fields = parse_csv0($line);
+# for ( $i = 0 ; $i < @fields ; $i++ ) {
+#   print "$i : $fields[$i]\n";
+# }
+
+# $line   = q(Ten Thousand,10000, 2710 ,,"10,000","It's ""10 Grand"", baby",10K);
+# @fields = parse_csv1($line);
+# for ( $i = 0 ; $i < @fields ; $i++ ) {
+#   print "$i : $fields[$i]\n";
+# }
+
+use Tie::CSV_File;
+tie @data, "Tie::CSV_File", "data.csv";
+
+for ( $i = 0 ; $i < @data ; $i++ ) {
+  printf "Row %d (Line %d) is %s\n", $i, $i + 1, "@{$data[$i]}";
+  for ( $j = 0 ; $j < @{ $data[$i] } ; $j++ ) {
+    print "Column $j is <$data[$i][$j]>\n";
   }
-  else {
-    ( $white, $leader ) = ( /^(\s+)/, '' );
-  }
-  s/^\s*?$leader(?:$white)?//gm;
-  return $_;
 }
-
-( $definition = << 'FINIS') =~ s/^\s+//gm;
-    The five varieties of camelids
-    are the familiar camel, his friends
-    the llama and the alpaca, and the
-    rather less well-known guanaco
-    and vicuña.
-FINIS
-print "$definition\n";
-
-print dequote $definition;
-
-$poem = dequote <<EVER_ON_AND_ON;
-    Now far ahead the Road has gone,
-      And I must follow, if I can,
-    Pursuing it with eager feet,
-      Until it joins some larger way
-    Where many paths and errands meet.
-      And whither then? I cannot say.
-          --Bilbo in /usr/src/perl/pp_ctl.c
-EVER_ON_AND_ON
-
-print "Here's your poem:\n\n$poem\n";
 
