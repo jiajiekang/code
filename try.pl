@@ -1,90 +1,26 @@
 use v5.10;
 use Data::Dump qw(dump);
-#
-# $sepline = join '', "\n", "-" x 6, "\n";
-#
-# $record = {
-#     NAME => "Jason",
-#     EMPNO => 132,
-#     TITLE => "deputy peon",
-#     AGE => 23,
-#     SALARY => 37_000,
-#     PALS => [ "Norbert", "Rhys", "Phineas"],
-# };
-#
-# printf "I am %s, and my pals are %s.\n",
-# $record->{NAME}, join(", ", @{$record->{PALS}});
-#
-# $byname{ $record->{NAME} } = $record;
-#
-# if ($rp = $byname{"Aron"}) {
-#     printf "Aron is emplyee %d.\n", $rp->{EMPNO};
-# }
-#
-# push @{ $byname{"Jason"}->{PALS} }, "Theodore";
-# printf "Jason now has %d pals\n", scalar @{$byname{"Jason"}->{PALS}};
-#
-# { local $record;
-#     while (($name, $record) = each %byname) {
-#         printf "%s is employee number %d\n", $name, $record->{EMPNO};
-#     }
-# }
-#
-# printf "%s\n", dump \%byname;
-# print $sepline;
-#
-# $employees[ $record->{EMPNO} ] = $record;
-#
-# if ($rp = $employees[132]) {
-#     printf "employee number 132 is %s\n", $rp->{NAME};
-# };
-#
-# print $sepline;
-#
-# $record = {
-#     NAME => "Jason",
-#     EMPNO => 132,
-#     TITLE => "deputy peon",
-#     AGE => 23,
-#     SALARY => 37_000,
-#     PALS => [ "Norbert", "Rhys", "Phineas"],
-# };
-#
-# use Clone 'clone';
-# $record_1 = clone($record);
-# @Array_of_Records = ($record, $record_1);
-#
-# for $record (@Array_of_Records) {
-#     for $key (sort keys %$record) {
-#         print "$key: $record->{$key}\n";
-#     }
-#     print "\n"
-# };
-#
-# {
-#     local $/="";
-#     $ARGV[0] = 'records.txt';
-#     @Array_of_Records = ();
-#     while(<>) {
-#         my @fields = split /^([^:]+):\s*/m;
-#         shift @fields;
-#         push @Array_of_Records, {map /(.*)/, @fields};
-#     }
-#     print dump @Array_of_Records;
-# };
-
-# use Dumpvalue;
-# Dumpvalue->new->dumpvars("main", "INC");
-#
-# $func = sub {
-# print "Hello\n";
-# };
-# use Data::Dumper;
-# print Dumper $func;
-
 use open qw(:utf8 :std);
 
+# $char = chr(0x394);
+# $code = ord($char);
+# printf "char %s is code %d, %#04x\n", $char, $code, $code;
+# use bytes;
+# printf "byte length: %d", bytes::length $char;
+
 # print "\xC4 and \x{0394} look different\n";
+
+# $string = "This is what you have";
+
+# +012345678901234567890 Indexing forwards (left to right)
+# 109876543210987654321- Indexing backwards (right to left)
+# # note that 0 means 10 or 20, etc. above
+# $first = substr( $string, 0, 1 );     # "T"
+# $start = substr( $string, 5, 2 );     # "is"
+# $rest  = substr( $string, 13 );       # "you have"
+# $last  = substr( $string, -1 );       # "e"
+# $end   = substr( $string, -4 );       # "have"
+# $piece = substr( $string, -8, 3 );    # "you"
 
 # $data = "ABCDEabc1111111122222222Hello";
 # ($leading, $s1, $s2, $strailing) = unpack "A5 x3 A8 A8 A*", $data;
@@ -96,12 +32,41 @@ use open qw(:utf8 :std);
 # substr( $string, 0, 1 ) = "";           # delete first character
 # substr( $string, -10 )  = "";           # delete last 10 characters
 
-# # you can test substrings with =~
+# you can test substrings with =~
 # if ( substr( $string, -10 ) =~ /pattern/ ) {
 #   print "Pattern matches in last 10 characters\n";
 # }
 # substr($string, 0, 5) =~ s/is/at/g;
 # print $string;
+
+# exchange the first and last letters in a string
+# $a = "make a hat";
+# ( substr( $a, 0, 1 ), substr( $a, -1 ) ) =
+#   ( substr( $a, -1 ), substr( $a, 0, 1 ) );
+# print $a;
+
+# extract column with unpack
+# $a = "To be or not to be";
+# $b = unpack("x6 A6", $a); # skip 6, grab 6
+# print $b;
+# ($b, $c) = unpack("x6 A2 X5 A2", $a); # forward 6, grab 2; backward 5, grab 2
+# print "$b\n$c\n";
+
+# sub cut2fmt {
+#   my (@positions) = @_;
+#   my $template    = '';
+#   my $lastpos     = 1;
+#   foreach $place (@positions) {
+#     $template .= "A" . ( $place - $lastpos ) . " ";
+#     $lastpos = $place;
+#   }
+#   $template .= "A*";
+#   return $template;
+# }
+# $fmt = cut2fmt( 8, 14, 20, 26, 30 );
+# print "$fmt\n";
+
+
 
 # $c = 5;
 # $a = $b || $c;
@@ -147,6 +112,18 @@ use open qw(:utf8 :std);
 # $string = "an apple a day";
 # foreach $char ( unpack( 'C*', $string ) ) {
 #   printf "%s has charactors %#04x\n", chr($char), ord $char;
+#   printf "octbytes: %d\n", bytes::length($char);
+# }
+
+# $string =  "\x{1F60D}";
+# print "$string\n";
+
+# use bytes;
+# use Encode qw(decode encode);
+# $octstr = encode('UTF-8', $string);
+
+# foreach $char ( unpack( 'C*', $octstr ) ) {
+#   printf "has charactors %#04x\n", $char;
 #   printf "octbytes: %d\n", bytes::length($char);
 # }
 
@@ -236,19 +213,19 @@ use open qw(:utf8 :std);
 # sub randcase { rand(100) < 20 ? "\u\l$_[0]" : "\U$_[0]" }
 # s/(\w+)/randcase($1)/ge;
 
-INIT {
-  our %nocap;
-  for (
-    qw(
-    a an the
-    and but or
-    as at but by for from in into of off on onto per to with
-    )
-    )
-  {
-    $nocap{$_}++;
-  }
-}
+# INIT {
+#   our %nocap;
+#   for (
+#     qw(
+#     a an the
+#     and but or
+#     as at but by for from in into of off on onto per to with
+#     )
+#     )
+#   {
+#     $nocap{$_}++;
+#   }
+# }
 
 # sub tc {
 #   local $_ = shift;
@@ -388,13 +365,31 @@ INIT {
 #   print "$i : $fields[$i]\n";
 # }
 
-use Tie::CSV_File;
-tie @data, "Tie::CSV_File", "data.csv";
+# use Tie::CSV_File;
+# tie @data, "Tie::CSV_File", "data.csv";
 
-for ( $i = 0 ; $i < @data ; $i++ ) {
-  printf "Row %d (Line %d) is %s\n", $i, $i + 1, "@{$data[$i]}";
-  for ( $j = 0 ; $j < @{ $data[$i] } ; $j++ ) {
-    print "Column $j is <$data[$i][$j]>\n";
-  }
-}
+# for ( $i = 0 ; $i < @data ; $i++ ) {
+#   printf "Row %d (Line %d) is %s\n", $i, $i + 1, "@{$data[$i]}";
+#   for ( $j = 0 ; $j < @{ $data[$i] } ; $j++ ) {
+#     print "Column $j is <$data[$i][$j]>\n";
+#   }
+# }
+
+# use constant AVOGADRO => 6.02252e23;
+# printf "You need %g of those for guac\n", AVOGADRO;
+
+# use Text::Soundex;
+# use User::pwent;
+# chomp( $user = <STDIN> );
+# exit unless defined $user;
+# $name_code = soundex($user);
+# while ( $uent = getpwent() ) {
+#   ( $firstname, $lastname ) = $uent->gecos =~ /(\w+)[^,]*\b(\w+)/;
+#   if ( $name_code eq soundex( $uent->name )
+#     || $name_code eq soundex($lastname)
+#     || $name_code eq soundex($firstname) )
+#   {
+#     printf "%s: %s %s\n", $uent->name, $firstname, $lastname;
+#   }
+# }
 
