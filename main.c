@@ -1,91 +1,84 @@
-#include <stdarg.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-void minscanf(const char *format, ...);
+#define STACK_MAX_SIZE 100
+#define MAX_STR_LEN 1000
+
+void push(double);
+double pop(void);
+
+int sp = 0;
+double stack[STACK_MAX_SIZE];
 
 int main(int argc, char *argv[]) {
-  int decimal;
-  int integer;
-  int octal;
-  int unsigned_decimal;
-  int hexadecimal_integer;
-  char character;
-  char str[100];
-  float float_point_number;
+  char c;
+  double op2;
+  char str[MAX_STR_LEN];
 
-  minscanf("%d", &decimal);
-  minscanf("%i", &integer);
-  minscanf("%o", &octal);
-  minscanf("%u", &unsigned_decimal);
-  minscanf("%x", &hexadecimal_integer);
-  minscanf("%c", &character);
-  minscanf("%s", str);
-  minscanf("%f", &float_point_number);
+  while (scanf("%s", str) != EOF) {
+    if (sscanf(str, "%lf", &op2) == 1) {
+      push(op2);
+    } else if (sscanf(str, "%c", &c) == 1) {
+      switch (c) {
+      case '+':
+        push(pop() + pop());
+        break;
+      case '-':
+        op2 = pop();
+        push(pop() - op2);
+        break;
+      case '*':
+        push(pop() * pop());
+        break;
 
-  printf("decimal: %d\n", decimal);
-  printf("integer: %i\n", integer);
-  printf("octal: %o\n", octal);
-  printf("unsigned_decimal: %u\n", unsigned_decimal);
-  printf("hexadecimal_integer: %x\n", hexadecimal_integer);
-  printf("character: %c\n", character);
-  printf("str: %s\n", str);
-  printf("float_point_number: %f\n", float_point_number);
+      case '/':
+        op2 = pop();
+
+        if (op2 != 0.0) {
+          push(pop() / op2);
+        } else {
+          printf("Error: zero divisor.\n");
+        }
+        break;
+
+      case '%':
+        op2 = pop();
+
+        if (op2 != 0.0) {
+          push((int)pop() % (int)op2);
+        } else {
+          printf("Error: zero divisor.\n");
+        }
+        break;
+
+      default:
+        printf("Error: unknown command.\n");
+        break;
+      }
+    }
+  }
+
+  printf("result: %.8g\n", pop());
 
   return EXIT_SUCCESS;
 }
 
-void minscanf(const char *format, ...) {
-  va_list arg_p;
-
-  va_start(arg_p, format);
-
-  for (; *format != '\0'; ++format) {
-    if (*format != '%') {
-      continue;
-    }
-
-    switch (*++format) {
-    case 'd':
-      scanf("%d", va_arg(arg_p, int *));
-      break;
-
-    case 'i':
-      scanf("%i", va_arg(arg_p, int *));
-      break;
-
-    case 'o':
-      scanf("%o", va_arg(arg_p, int *));
-      break;
-
-    case 'u':
-      scanf("%u", va_arg(arg_p, unsigned int *));
-      break;
-
-    case 'x':
-      scanf("%x", va_arg(arg_p, int *));
-      break;
-
-    case 'c':
-      scanf("%c", va_arg(arg_p, char *));
-      break;
-
-    case 's':
-      scanf("%s", va_arg(arg_p, char *));
-      break;
-
-    case 'e':
-    case 'f':
-    case 'g':
-      scanf("%f", va_arg(arg_p, float *));
-      break;
-
-    default:
-      break;
-    }
+void push(double f) {
+  if (sp < STACK_MAX_SIZE) {
+    stack[sp++] = f;
+  } else {
+    printf("Error: stack full, can't push %g.\n", f);
   }
-  va_end(arg_p);
 }
 
-// NOTE: run: ./minscanf <<< "1 2 3 4 5r hello 2.3"
-// In Unix like systems:< file or directory, << here doc, <<< here string
+double pop(void) {
+  if (sp > 0) {
+    return stack[--sp];
+  } else {
+    printf("Error: stack empty.\n");
+    return 0.0;
+  }
+}
+
+// NOTE: run: ./calculator <<< "2 3 4 2 - + +"
