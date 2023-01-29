@@ -66,21 +66,18 @@ use open qw(:utf8 :std);
 # $fmt = cut2fmt( 8, 14, 20, 26, 30 );
 # print "$fmt\n";
 
-
-
 # $c = 5;
 # $a = $b || $c;
 # print "$a\n";
 
 # $unistr = pack("U4",0x24b6,0x24b7,0x24b8,0x24b9);
 # @unichars = unpack("U*", $unistr);
-# printf "%#x, " x @unichars, @unichars;
+# print "$unistr\n@unichars\n";
 
 # $hal  = "HAL";
 # @byte = unpack( "C*", $hal );
 # foreach $val (@byte) {
-#   $val ^= 0b00100000;  # add one to each byte value
-#   $val ^= 0b00100000;
+#   $val += 1;  # add one to each byte value
 # }
 # $ibm = pack( "C*", @byte );
 # print "$ibm\n";    # prints "IBM"
@@ -91,8 +88,9 @@ use open qw(:utf8 :std);
 # print "$word\n";
 
 # printf "%#vd\n", "fac\x{0327}ade";
-# printf "%#vx\n", "fac\x{0327}print "\N{GREEK CAPITAL LETTER DELTA} is called delta.\n";ade";
+# printf "%#vx\n", "fac\x{0327}";
 
+# print "\N{GREEK CAPITAL LETTER DELTA} is called delta.\n";ade";
 # use charnames qw(:full :short greek Cyrillic);
 # print "\N{GREEK CAPITAL LETTER DELTA} is called delta.\n";
 # print "\N{greek:Delta} is an upper-case delta.\n";
@@ -107,6 +105,58 @@ use open qw(:utf8 :std);
 # $name = "music sharp sign";
 # $code = charnames::vianame($name);
 # printf "%s is character u+%04x (%s)\n", $name, $code, chr($code);
+
+# %seen   = ();
+# $string = "an apple a day";
+# foreach $char ( split //, $string ) {
+#   $seen{$char}++;
+# }
+# print "unique chars are: ", sort( keys %seen ), "\n";
+
+# $string = "an apple a day";
+# $sum    = 0;
+# foreach $byteval ( unpack( "C*", $string ) ) {
+#   $sum += $byteval;
+# }
+# $sum = unpack("%32C*", $string);
+# print "sum is $sum\n";
+
+# sum - compute 16-bit checksum of all input files
+# $checksum = 0;
+# local @ARGV = qw/test.txt/;
+# while (<>) { $checksum += unpack( "%16C*", $_ ) }
+# $checksum %= ( 2**16 ) - 1;
+# print "$checksum\n";
+
+# slowcat - emulate a s l o w line printer
+# usage: slowcat [-DELAY] [files ...]
+# $DELAY = ( $ARGV[0] =~ /^-([.\d]+)/ ) ? ( shift, $1 ) : 1;
+# $|     = 1;
+# while (<>) {
+#   for ( split(//) ) {
+#     print;
+#     select( undef, undef, undef, 0.005 * $DELAY );
+#   }
+# }
+
+# reverse word order
+# $string   = 'Yoda said, "can you see this?"';
+# @allwords = split( " ", $string );
+# $revwords = join( " ", reverse @allwords );
+# $revwords = join("", reverse split(/(\s+)/, $string));
+# print $revwords, "\n";
+
+# $string = "fac\x{0327}ade"; # "façade"
+# $string =~ /fa.ade/; # fails
+# $string =~ /fa\Xade/; # succeeds
+# @chars = split(//, $string); # 7 letters in @chars
+# @chars = $string =~ /(.)/g; # same thing
+# print scalar @chars;
+# @chars = $string =~ /(\X)/g; # 6 "letters" in @chars
+# print "\n";
+# print scalar @chars;
+
+use bytes;
 
 # use bytes;
 # $string = "an apple a day";
@@ -136,16 +186,6 @@ use open qw(:utf8 :std);
 # use Digest::MD5 qw(md5);
 # $sum = md5($string);
 # print "sum is $sum\n";
-
-# $string = "fac\x{0327}ade"; # "façade"
-# $string =~ /fa.ade/; # fails
-# $string =~ /fa\Xade/; # succeeds
-# @chars = split(//, $string); # 7 letters in @chars
-# @chars = $string =~ /(.)/g; # same thing
-# print scalar @chars;
-# @chars = $string =~ /(\X)/g; # 6 "letters" in @chars
-# print "\n";
-# print scalar @chars;
 
 # for $word ( "anne\x{301}e", "nin\x{303}o" ) {
 #   printf "%s simple reversed to %s\n", $word, scalar reverse $word;
