@@ -1,12 +1,13 @@
 use v5.10;
 use Data::Dump qw(dump);
 use open qw(:utf8 :std);
+use utf8;
 
 # $char = chr(0x394);
 # $code = ord($char);
 # printf "char %s is code %d, %#04x\n", $char, $code, $code;
 # use bytes;
-# printf "byte length: %d", bytes::length $char;
+# printf "byte length: %d\n", bytes::length $char;
 
 # print "\xC4 and \x{0394} look different\n";
 
@@ -156,43 +157,6 @@ use open qw(:utf8 :std);
 # print "\n";
 # print scalar @chars;
 
-use bytes;
-
-# use bytes;
-# $string = "an apple a day";
-# foreach $char ( unpack( 'C*', $string ) ) {
-#   printf "%s has charactors %#04x\n", chr($char), ord $char;
-#   printf "octbytes: %d\n", bytes::length($char);
-# }
-
-# $string =  "\x{1F60D}";
-# print "$string\n";
-
-# use bytes;
-# use Encode qw(decode encode);
-# $octstr = encode('UTF-8', $string);
-
-# foreach $char ( unpack( 'C*', $octstr ) ) {
-#   printf "has charactors %#04x\n", $char;
-#   printf "octbytes: %d\n", bytes::length($char);
-# }
-
-# $string = "an apple a day";
-# $sum = 0;
-# foreach $byteval ( unpack( "C*", $string ) ) {
-#   $sum += $byteval;
-# }
-# $sum = unpack("%16C*", $string);
-# use Digest::MD5 qw(md5);
-# $sum = md5($string);
-# print "sum is $sum\n";
-
-# for $word ( "anne\x{301}e", "nin\x{303}o" ) {
-#   printf "%s simple reversed to %s\n", $word, scalar reverse $word;
-#   printf "%s better reversed to %s\n", $word,
-#     join( "", reverse $word =~ /\X/g );
-# }
-
 # use Unicode::Normalize;
 # $s1 = "fa\x{E7}ade";
 # $s2 = "fac\x{0327}ade";
@@ -230,9 +194,19 @@ use bytes;
 # }
 # $chars = length;
 
-# use Encode qw(encode_utf8);
-# $ff     = "\x{FB00}";          # ff ligature
-# $ff_oct = encode_utf8($ff);    # convert to octets
+use Unicode::Normalize;
+$ff = "\x{FB00}";    # ff ligature
+print NFKC($ff), "\n";
+
+$char = chr(0x394);
+$char = '好';
+use Encode qw(encode);
+
+# use bytes;
+$ff_oct = encode( 'UTF-8', $char );    # convert to octets
+print length($ff_oct), "\n";
+@byte_str = unpack( 'C*', $ff_oct );
+print qq/@{[map { sprintf "%#x", $_ } @byte_str]}/;
 
 # our ( $rows, $cols );
 # no strict 'refs';    # for ${$1}/g below

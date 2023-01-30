@@ -1,84 +1,95 @@
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define STACK_MAX_SIZE 100
-#define MAX_STR_LEN 1000
+#define MAX_LINE_LEN 1000
 
-void push(double);
-double pop(void);
+typedef enum { false, true } boolean;
 
-int sp = 0;
-double stack[STACK_MAX_SIZE];
+boolean parse_arg_list(int argc, char *argv[]);
+void find_pattern(char *pattern, FILE *file_p);
+
+char *program_name;
+
+boolean except = false;
+boolean number = false;
+
+int pattern_arg_pos = 1;
 
 int main(int argc, char *argv[]) {
-  char c;
-  double op2;
-  char str[MAX_STR_LEN];
+  if (!parse_arg_list(argc, argv)) {
+    exit(EXIT_FAILURE);
+  }
 
-  while (scanf("%s", str) != EOF) {
-    if (sscanf(str, "%lf", &op2) == 1) {
-      push(op2);
-    } else if (sscanf(str, "%c", &c) == 1) {
+  if (argc - pattern_arg_pos > 1) {
+    for (int file_arg_pos = pattern_arg_pos + 1; file_arg_pos < argc;
+         file_arg_pos++) {
+      FILE *file_p;
+      if ((file_p = fopen(argv[file_arg_pos], "r")) == NULL) {
+        fprintf(stderr, "%s: can't open %s.\n", program_name,
+                argv[file_arg_pos]);
+        exit(EXIT_FAILURE);
+      }
+      printf("%s\n", argv[file_arg_pos]);
+      find_pattern(argv[pattern_arg_pos], file_p);
+      fclose(file_p);
+
+      if (file_arg_pos < argc - 1) {
+        putc('\n', stdout);
+      }
+    }
+  } else {
+    find_pattern(argv[pattern_arg_pos], stdin);
+  }
+
+  exit(EXIT_SUCCESS);
+}
+
+boolean parse_arg_list(int argc, char *argv[]) {
+  program_name = argv[0];
+
+  if (argc < 3) {
+    fprintf(stderr, "Usage: %s [-xn]... PATTERN [FILE]...\n", program_name);
+    return false;
+  }
+
+  while (--argc > 0 && (*++argv)[0] == '-') {
+    int c;
+    while ((c = *++argv[0])) {
       switch (c) {
-      case '+':
-        push(pop() + pop());
-        break;
-      case '-':
-        op2 = pop();
-        push(pop() - op2);
-        break;
-      case '*':
-        push(pop() * pop());
+      case 'x':
+        except = true;
         break;
 
-      case '/':
-        op2 = pop();
-
-        if (op2 != 0.0) {
-          push(pop() / op2);
-        } else {
-          printf("Error: zero divisor.\n");
-        }
-        break;
-
-      case '%':
-        op2 = pop();
-
-        if (op2 != 0.0) {
-          push((int)pop() % (int)op2);
-        } else {
-          printf("Error: zero divisor.\n");
-        }
+      case 'n':
+        number = true;
         break;
 
       default:
-        printf("Error: unknown command.\n");
+        fprintf(stderr, "%s: illegal option %c.\n", program_name, c);
+        return false;
         break;
       }
     }
+
+    ++pattern_arg_pos;
   }
 
-  printf("result: %.8g\n", pop());
-
-  return EXIT_SUCCESS;
+  return true;
 }
 
-void push(double f) {
-  if (sp < STACK_MAX_SIZE) {
-    stack[sp++] = f;
-  } else {
-    printf("Error: stack full, can't push %g.\n", f);
-  }
-}
-
-double pop(void) {
-  if (sp > 0) {
-    return stack[--sp];
-  } else {
-    printf("Error: stack empty.\n");
-    return 0.0;
+void find_pattern(char *pattern, FILE *file_p) {
+  size_t line_number = 1;
+  char line[MAX_LINE_LEN];
+  while (fgets(line, MAX_LINE_LEN, file_p) != NULL) {
+    if ((strstr(line, pattern) != NULL) != except) {
+      if (number) {
+        printf("%ld: ", line_number);
+      }
+      printf("%s", line);
+    }
+    ++line_number;
   }
 }
 
-// NOTE: run: ./calculator <<< "2 3 4 2 - + +"
+// NOTE: run: ./find -n "Some people" file_1.txt file_2.txt
