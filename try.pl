@@ -194,20 +194,38 @@ use utf8;
 # }
 # $chars = length;
 
-use Unicode::Normalize;
-$ff = "\x{FB00}";    # ff ligature
-print NFKC($ff), "\n";
+# use Unicode::Normalize;
+# $ff = "\x{FB00}";    # ff ligature
+# print NFKC($ff), "\n";
 
-$char = chr(0x394);
-$char = '好';
-use Encode qw(encode);
+# $char = chr(0x394);
+# $char = '好';
+# use Encode qw(encode);
 
-# use bytes;
-$ff_oct = encode( 'UTF-8', $char );    # convert to octets
-print length($ff_oct), "\n";
-@byte_str = unpack( 'C*', $ff_oct );
-print qq/@{[map { sprintf "%#x", $_ } @byte_str]}/;
+# # use bytes;
+# $ff_oct = encode( 'UTF-8', $char );    # convert to octets
+# print length($ff_oct), "\n";
+# @byte_str = unpack( 'C*', $ff_oct );
+# print qq/@{[map { sprintf "%#x", $_ } @byte_str]}/;
 
+while (<>) {
+  1 while s/\t+/' ' x (length($&) * 8 - length($`) % 8)/e;
+  print;
+}
+
+1 while s/^(.*?)(\t+)/$1 . ' ' x (length($2) * 4 - length($1) % 4)/e;
+1 while s/\t+/' ' x (($+[0] - $-[0]) * 4 - $-[0] % 4)/e;
+
+$_ = 'Hello world!';
+/(ll).+(wor)ld/;
+print "@+"; 
+
+use Text::Tabs;
+@expanded_lines  = expand(@lines_with_tabs);
+@tabulated_lines = unexpand(@lines_without_tabs);
+$tabstop = 4;
+while (<>) { print expand($_) }
+while (<>) { print unexpand($_) }
 # our ( $rows, $cols );
 # no strict 'refs';    # for ${$1}/g below
 # my $text;
