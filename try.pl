@@ -208,30 +208,34 @@ use utf8;
 # @byte_str = unpack( 'C*', $ff_oct );
 # print qq/@{[map { sprintf "%#x", $_ } @byte_str]}/;
 
-while (<>) {
-  1 while s/\t+/' ' x (length($&) * 8 - length($`) % 8)/e;
-  print;
-}
+# while (<>) {
+#   1 while s/\t+/' ' x (length($&) * 8 - length($`) % 8)/e;
+#   print;
+# }
 
-1 while s/^(.*?)(\t+)/$1 . ' ' x (length($2) * 4 - length($1) % 4)/e;
-1 while s/\t+/' ' x (($+[0] - $-[0]) * 4 - $-[0] % 4)/e;
+# 1 while s/^(.*?)(\t+)/$1 . ' ' x (length($2) * 4 - length($1) % 4)/e;
+# 1 while s/\t+/' ' x (($+[0] - $-[0]) * 4 - $-[0] % 4)/e;
 
-$_ = 'Hello world!';
-/(ll).+(wor)ld/;
-print "@+"; 
+# $_ = 'Hello world!';
+# /(ll).+(wor)ld/;
+# print "@+";
 
-use Text::Tabs;
-@expanded_lines  = expand(@lines_with_tabs);
-@tabulated_lines = unexpand(@lines_without_tabs);
-$tabstop = 4;
-while (<>) { print expand($_) }
-while (<>) { print unexpand($_) }
+# use Text::Tabs;
+# @expanded_lines  = expand(@lines_with_tabs);
+# @tabulated_lines = unexpand(@lines_without_tabs);
+# $tabstop = 4;
+# while (<>) { print expand($_) }
+# while (<>) { print unexpand($_) }
+
 # our ( $rows, $cols );
 # no strict 'refs';    # for ${$1}/g below
 # my $text;
 # ( $rows, $cols ) = ( 24, 80 );
 # $text = q(I am $rows high and $cols long);    # like single quotes!
 # $text =~ s/\$(\w+)/${$1}/g;
+# print $text;
+# $text = "I am 17 years old";
+# $text =~ s/(\d+)/2 * $1/eg;
 # print $text;
 
 # titlecase each word's first character, lowercase the rest
@@ -258,45 +262,87 @@ while (<>) { print unexpand($_) }
 #     $nocap{$_}++;
 #   }
 # }
-
+#
 # sub tc {
 #   local $_ = shift;
-
+#
 #   # put into lowercase if on stop list, else titlecase
-#   s/(\pL[\pL']*)/$nocap{$1} ? lc($1) : ucfirst(lc($1))/ge;
-#   s/^(\pL[\pL']*) /\u\L$1/x;    # first word guaranteed to cap
-#   s/ (\pL[\pL']*)$/\u\L$1/x;    # last word guaranteed to cap
-
+#   s/(\pl[\pl']*)/$nocap{$1} ? lc($1) : ucfirst(lc($1))/ge;
+#   s/^(\pl[\pl']*) /\u\l$1/x;    # first word guaranteed to cap
+#   s/ (\pl[\pl']*)$/\u\l$1/x;    # last word guaranteed to cap
+#
 #   # treat parenthesized portion as a complete title
-#   s/\( (\pL[\pL']*) /(\u\L$1/x;
-#   s/(\pL[\pL']*) \) /\u\L$1)/x;
-
+#   s/\( (\pl[\pl']*) /(\u\l$1/x;
+#   s/(\pl[\pl']*) \) /\u\l$1)/x;
+#
 #   # capitalize first word following colon or semi-colon
-#   s/ ( [:;] \s+ ) (\pL[\pL']* ) /$1\u\L$2/x;
+#   s/ ( [:;] \s+ ) (\pl[\pl']* ) /$1\u\l$2/x;
 #   return $_;
 # }
-
-# # with apologies (or kudos) to Stephen Brust, PJF,
-# # and to JRRT, as always.
+#
+# # with apologies (or kudos) to stephen brust, pjf,
+# # and to jrrt, as always.
 # @data = (
-#   "the enchantress of \x{01F3}ur mountain",
-#   "meeting the enchantress of \x{01F3}ur mountain",
+#   "the enchantress of \x{01f3}ur mountain",
+#   "meeting the enchantress of \x{01f3}ur mountain",
 #   "the lord of the rings: the fellowship of the ring",
 # );
 # $mask = "%-20s: %s\n";
-
+#
 # sub tc_lame {
 #   local $_ = shift;
-#   s/(\w+\S*\w*)/\u\L$1/g;
+#   s/(\w+\s*)/\u\l$1/g;
 #   return $_;
 # }
+#
 # for $datum (@data) {
-#   printf $mask, "ALL CAPITALS",     uc($datum);
+#   printf $mask, "all capitals",     uc($datum);
 #   printf $mask, "no capitals",      lc($datum);
 #   printf $mask, "simple titlecase", tc_lame($datum);
 #   printf $mask, "better titlecase", tc($datum);
 #   print "\n";
 # }
+
+# use Interpolation E => 'eval';
+# print "You bounced check number $E{500 + int rand(100)}\n";
+#
+# sub func { return shift() * 2; }
+#
+# use Interpolation money => \&func;
+# print "Money is $money{10}";
+
+# ( $definition = << 'FINIS') =~ s/^[^\S\n]+//gm;
+#     The five varieties of camelids
+#     are the familiar camel, his friends
+#
+#     the llama and the alpaca, and the
+#     rather less well-known guanaco
+#     and vicuña.
+# FINIS
+# print "$definition\n";
+
+# sub fix {
+#   my $string = shift;
+#   $string =~ s/^\s+//gm;
+#   return $string;
+# }
+# print fix( << "END");
+# My stuff goes here
+# END
+#
+# # With function predeclaration, you can omit the parens:
+# print fix << "END";
+# My stuff goes here
+# END
+
+# ( $quote = << '    FINIS') =~ s/^\s+//gm;
+#     ...we will have peace, when you and all your works have
+#     perished--and the works of your dark master to whom you would
+#     deliver us. You are a liar, Saruman, and a corrupter of men's
+#     hearts. --Theoden in /usr/src/perl/taint.c
+#     FINIS
+# $quote =~ s/\s+--/\n--/;    #move attribution to line of its own
+# print "$quote\n";
 
 # sub dequote {
 #   local $_ = shift;
@@ -310,40 +356,45 @@ while (<>) { print unexpand($_) }
 #   s/^\s*?$leader(?:$white)?//gm;
 #   return $_;
 # }
-
-# ( $definition = << 'FINIS') =~ s/^\s+//gm;
-#     The five varieties of camelids
-#     are the familiar camel, his friends
-#     the llama and the alpaca, and the
-#     rather less well-known guanaco
-#     and vicuña.
-# FINIS
-# print "$definition\n";
-
+#
+# ( $definition = << 'finis') =~ s/^\s+//gm;
+#     @@@ int
+#     @@@ runops( ) {
+#     @@@ SAVEI32(runlevel);
+#     @@@ runlevel++;
+#     @@@ while ( op = (*op->op_ppaddr)( ) ) ;
+#     @@@ TAINT_NOT;
+#     @@@ return 0;
+#     @@@ }
+# finis
 # print dequote $definition;
+#
+# $poem = dequote <<ever_on_and_on;
+#     now far ahead the road has gone,
+#       and i must follow, if i can,
+#     pursuing it with eager feet,
+#       until it joins some larger way
+#     where many paths and errands meet.
+#       and whither then? i cannot say.
+#           # --bilbo in /usr/src/perl/pp_ctl.c
+# ever_on_and_on
+# print "here's your poem:\n\n$poem\n";
 
-# $poem = dequote <<EVER_ON_AND_ON;
-#     Now far ahead the Road has gone,
-#       And I must follow, if I can,
-#     Pursuing it with eager feet,
-#       Until it joins some larger way
-#     Where many paths and errands meet.
-#       And whither then? I cannot say.
-#           --Bilbo in /usr/src/perl/pp_ctl.c
-# EVER_ON_AND_ON
-
-# print "Here's your poem:\n\n$poem\n";
-
-# wrapdemo - show how Text::Wrap works
-
+# # wrapdemo - show how Text::Wrap works
+# @input = (
+#   "Folding and splicing is the work of an editor,",
+#   "not a mere collection of silicon",
+#   "and", "mobile electrons!"
+# );
 # use Text::Wrap qw($columns &wrap);
 # $columns = 20;
 # print "0123456789" x 2,         "\n";
 # print wrap( "    ", "  ", @input ), "\n";
 
+# # merge multiple lines into one, then wrap one long line
 # use Text::Wrap;
 # undef $/;
-# print wrap('', '', split(/\s*\n\s*/, <>));
+# print wrap( '', '', split( /\s*\n\s*/, <> ) );
 
 # use Text::Wrap    qw(&wrap $columns);
 # use Term::ReadKey qw(GetTerminalSize);
@@ -355,64 +406,69 @@ while (<>) { print unexpand($_) }
 # }
 
 # use Text::Autoformat;
-# local $/ = '';
+# $/ = '';
 # while (<>) {
 #   print autoformat( $_, { squeeze => 0, all => 1 } ), "\n";
 # }
 
-# $string = q(Mom said, "Don't do that.");
+# $string = q(mom said, "don't do that.");
 # $string =~ s/(['"])/\\$1/g;
+# print "$string\n";
+# $string = q(Mom said, "Don't do that.");
 # $string =~ s/(['"])/$1$1/g;
-# print $string;
+# print "$string\n";
 
 # $string = "this \Qis a test!\E";
+# print "$string\n";
 # $string = "this is\\ a\\ test\\!";
+# print "$string\n";
 # $string = "this " . quotemeta("is a test!");
-# print $string;
+# print "$string\n";
 
-# use Text::ParseWords;
+continue:
 
+# use text::parsewords;
 # sub parse_csv0 {
 #   return quotewords( "," => 0, $_[0] );
 # }
 
-# use Text::CSV;
+# use text::csv;
 
 # sub parse_csv1 {
 #   my $line = shift;
-#   my $csv  = Text::CSV->new();
+#   my $csv  = text::csv->new();
 #   return $csv->parse($line) && $csv->fields();
 # }
 
 # $line =
-# q(XYZZY,"","O'Reilly, Inc","Wall, Larry","a \"glug\" bit,",5,"Error, Core Dumped");
+# q(xyzzy,"","o'reilly, inc","wall, larry","a \"glug\" bit,",5,"error, core dumped");
 # @fields = parse_csv0($line);
 # for ( $i = 0 ; $i < @fields ; $i++ ) {
 #   print "$i : $fields[$i]\n";
 # }
 
-# $line   = q(Ten Thousand,10000, 2710 ,,"10,000","It's ""10 Grand"", baby",10K);
+# $line   = q(ten thousand,10000, 2710 ,,"10,000","it's ""10 grand"", baby",10k);
 # @fields = parse_csv1($line);
 # for ( $i = 0 ; $i < @fields ; $i++ ) {
 #   print "$i : $fields[$i]\n";
 # }
 
-# use Tie::CSV_File;
-# tie @data, "Tie::CSV_File", "data.csv";
+# use tie::csv_file;
+# tie @data, "tie::csv_file", "data.csv";
 
 # for ( $i = 0 ; $i < @data ; $i++ ) {
-#   printf "Row %d (Line %d) is %s\n", $i, $i + 1, "@{$data[$i]}";
+#   printf "row %d (line %d) is %s\n", $i, $i + 1, "@{$data[$i]}";
 #   for ( $j = 0 ; $j < @{ $data[$i] } ; $j++ ) {
-#     print "Column $j is <$data[$i][$j]>\n";
+#     print "column $j is <$data[$i][$j]>\n";
 #   }
 # }
 
-# use constant AVOGADRO => 6.02252e23;
-# printf "You need %g of those for guac\n", AVOGADRO;
+# use constant avogadro => 6.02252e23;
+# printf "you need %g of those for guac\n", avogadro;
 
-# use Text::Soundex;
-# use User::pwent;
-# chomp( $user = <STDIN> );
+# use text::soundex;
+# use user::pwent;
+# chomp( $user = <stdin> );
 # exit unless defined $user;
 # $name_code = soundex($user);
 # while ( $uent = getpwent() ) {
