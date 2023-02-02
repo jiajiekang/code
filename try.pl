@@ -425,43 +425,58 @@ use utf8;
 # $string = "this " . quotemeta("is a test!");
 # print "$string\n";
 
-continue:
+# # 1. trim leading and trailing white space
+# # 2. collapse internal whitespace to single space each
+# # 3. take input from $_ if no arguments given
+# # 4. join return list into single scalar with intervening spaces
+# # if return is scalar context
+# sub trim {
+#   my @out = @_ ? @_ : $_;
+#   $_ = join( ' ', split(' ') ) for @out;
+#   return wantarray ? @out : "@out";
+# }
+# print trim <>;
 
-# use text::parsewords;
+# use Text::ParseWords;
+#
 # sub parse_csv0 {
 #   return quotewords( "," => 0, $_[0] );
 # }
-
-# use text::csv;
-
+#
+# use Text::CSV;
+#
 # sub parse_csv1 {
 #   my $line = shift;
-#   my $csv  = text::csv->new();
+#   my $csv  = Text::CSV->new();
 #   return $csv->parse($line) && $csv->fields();
 # }
-
+#
 # $line =
 # q(xyzzy,"","o'reilly, inc","wall, larry","a \"glug\" bit,",5,"error, core dumped");
 # @fields = parse_csv0($line);
 # for ( $i = 0 ; $i < @fields ; $i++ ) {
 #   print "$i : $fields[$i]\n";
 # }
-
+#
 # $line   = q(ten thousand,10000, 2710 ,,"10,000","it's ""10 grand"", baby",10k);
 # @fields = parse_csv1($line);
 # for ( $i = 0 ; $i < @fields ; $i++ ) {
 #   print "$i : $fields[$i]\n";
 # }
-
-# use tie::csv_file;
-# tie @data, "tie::csv_file", "data.csv";
-
+#
+# print "\n";
+#
+# use Tie::CSV_File;
+# tie @data, "Tie::CSV_File", "data.csv";
+#
 # for ( $i = 0 ; $i < @data ; $i++ ) {
 #   printf "row %d (line %d) is %s\n", $i, $i + 1, "@{$data[$i]}";
 #   for ( $j = 0 ; $j < @{ $data[$i] } ; $j++ ) {
 #     print "column $j is <$data[$i][$j]>\n";
 #   }
 # }
+
+continue:
 
 # use constant avogadro => 6.02252e23;
 # printf "you need %g of those for guac\n", avogadro;

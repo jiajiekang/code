@@ -1,29 +1,49 @@
-#include <ctype.h>
+#include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <unistd.h>
 
-int is_upper_v1(int c);
-int is_upper_v2(int c);
+#define BUFFER_SIZE 1024
+
+void error(char *format, ...);
+void copy_file(int from, int to);
 
 int main(int argc, char *argv[]) {
-  if (is_upper_v1('c')) {
-    puts("is_upper_v1: This letter is uppercase.");
+  if (argc == 1) {
+    copy_file(0, 1);
   } else {
-    puts("is_upper_v1: This letter is lowercase.");
-  }
+    for (int file_index = 1; file_index < argc; ++file_index) {
+      int file_descriptor;
+      if ((file_descriptor = open(argv[file_index], O_RDONLY, 0)) == -1) {
+        error("Error: could not open the file %s.", argv[file_index]);
+        exit(EXIT_FAILURE);
+      }
 
-  if (is_upper_v2('c')) {
-    puts("is_upper_v2: This letter is uppercase.");
-  } else {
-    puts("is_upper_v2: This letter is lowercase.");
+      copy_file(file_descriptor, 1);
+    }
   }
 
   exit(EXIT_SUCCESS);
 }
 
-int is_upper_v1(int c) { return (c >= 'A' && c <= 'Z'); }
+void copy_file(int from, int to) {
+  char buffer[BUFFER_SIZE];
 
-int is_upper_v2(int c) {
-  return (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", c) != NULL);
+  int n;
+  while ((n = read(from, buffer, BUFFER_SIZE)) > 0) {
+    write(to, buffer, n);
+  }
+}
+
+void error(char *format, ...) {
+  va_list arg_p;
+
+  va_start(arg_p, format);
+  fprintf(stderr, "Error: ");
+  vfprintf(stderr, format, arg_p);
+  fprintf(stderr, "\n");
+  va_end(arg_p);
+
+  exit(EXIT_FAILURE);
 }
