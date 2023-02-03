@@ -1,49 +1,75 @@
+#include "main.h"
 #include <fcntl.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#define PERMS 0666
 
-#define BUFFER_SIZE 1024
+FILE *fopen(char *name, char *mode) {
+  int fd;
+  FILE *fp;
 
-void error(char *format, ...);
-void copy_file(int from, int to);
-
-int main(int argc, char *argv[]) {
-  if (argc == 1) {
-    copy_file(0, 1);
-  } else {
-    for (int file_index = 1; file_index < argc; ++file_index) {
-      int file_descriptor;
-      if ((file_descriptor = open(argv[file_index], O_RDONLY, 0)) == -1) {
-        error("Error: could not open the file %s.", argv[file_index]);
-        exit(EXIT_FAILURE);
-      }
-
-      copy_file(file_descriptor, 1);
+  if (*mode != 'r' && *mode != 'w' && *mode != 'a') {
+    return NULL;
+  }
+  for (fp = _iob; fp < _iob + OPEN_MAX; fp++) {
+    if ((fp->flag & (_READ | _WRITE)) == 0) {
+      break;
     }
   }
-
-  exit(EXIT_SUCCESS);
-}
-
-void copy_file(int from, int to) {
-  char buffer[BUFFER_SIZE];
-
-  int n;
-  while ((n = read(from, buffer, BUFFER_SIZE)) > 0) {
-    write(to, buffer, n);
+  if (fp >= _iob + OPEN_MAX) {
+    return NULL;
   }
+
+  if (*mode == 'w') {
+    fd = creat(name, PERMS);
+  } else if (*mode == 'a') {
+    if ((fd = open(name, O_WRONLY, 0)) == -1) {
+      fd = creat(name, PERMS);
+    }
+    lseek(fd, 0L, 2);
+  } else {
+    fd = open(name, O_RDONLY, 0);
+  }
+
+  if (fd == -1) {
+    return NULL;
+  }
+  fp->fd = fd;
+  fp->cnt = 0;
+  fp->base = NULL;
+  fp->flag = (*mode == 'r') ? _READ : _WRITE;
+
+  return fp;
 }
 
-void error(char *format, ...) {
-  va_list arg_p;
+/* _fillbuf: allocate and fill input buffer */
+int _fillbuf(FILE *fp) {
+  int bufsize;
+  if ((fp->flag & (_READ | _EOF | _ERR)) != _READ)
+    return EOF;
+  bufsize = (fp->flag & _UNBUF) ? 1 : BUFSIZ;
+  if (fp->base == NULL) /* no buffer yet */
+    if ((fp->base = (char *)malloc(bufsize)) == NULL)
+      return EOF; /* can't get buffer */
+  fp->ptr = fp->base;
+  fp->cnt = read(fp->fd, fp->ptr, bufsize);
+  if (--fp->cnt < 0) {
+    if (fp->cnt == -1)
+      fp->flag |= _EOF;
+    else
+      fp->flag |= _ERR;
+    fp->cnt = 0;
+    return EOF;
+  }
+  return (unsigned char)*fp->ptr++;
+}
 
-  va_start(arg_p, format);
-  fprintf(stderr, "Error: ");
-  vfprintf(stderr, format, arg_p);
-  fprintf(stderr, "\n");
-  va_end(arg_p);
+FILE _iob[OPEN_MAX] = {/* stdin, stdout, stderr */
+                       {0, (char *)0, (char *)0, _READ, 0},
+                       {0, (char *)0, (char *)0, _WRITE, 1},
+                       {0, (char *)0, (char *)0, _WRITE | _UNBUF, 2}};
 
-  exit(EXIT_FAILURE);
+int main (int argc, char *argv[])
+{
+  int c = getchar();
+
+  return 0;
 }

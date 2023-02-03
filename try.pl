@@ -476,14 +476,38 @@ use utf8;
 #   }
 # }
 
-continue:
-
 # use constant avogadro => 6.02252e23;
 # printf "you need %g of those for guac\n", avogadro;
+#
+# *AVOGADRO = \6.02252e23;
+# print "You need $AVOGADRO of those for guac\n";
 
-# use text::soundex;
-# use user::pwent;
-# chomp( $user = <stdin> );
+# package Tie::Constvar;
+# use Carp;
+#
+# sub TIESCALAR {
+#   my ( $class, $initval ) = @_;
+#   my $var = $initval;
+#   return bless \$var => $class;
+# }
+#
+# sub FETCH {
+#   my $selfref = shift;
+#   return $$selfref;
+# }
+#
+# sub STORE {
+#   confess "Meddle not with the constants of the universe";
+# }
+# tie my $AVOGADRO, Tie::Constvar, 6.02252e23;
+# print "You need $AVOGADRO of those for guac\n";
+# $AVOGADRO = 6.6256e-34;    # sorry, Max
+
+# use Text::Soundex;
+# use User::pwent;
+#
+# print "Lookup user: ";
+# chomp( $user = <STDIN> );
 # exit unless defined $user;
 # $name_code = soundex($user);
 # while ( $uent = getpwent() ) {
@@ -496,3 +520,10 @@ continue:
 #   }
 # }
 
+use Text::Metaphone qw(Metaphone);
+use String::Approx  qw(amatch);
+
+if ( amatch( Metaphone("Kris Jenson"), [1], Metaphone("Christiansen") ) ) {
+  print Metaphone("Kris Jenson");
+  print "Close enough!\n";
+}
