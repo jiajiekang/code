@@ -51,20 +51,45 @@ use utf8;
 #   printf "%8g %8.0f %8s %8s %8s\n", $n, $n, int($n), floor($n), ceil($n);
 # }
 
-print "Infancy is: ";
-foreach ( 0 .. 2 ) {
-  print "$_ ";
-}
-print "\n";
-print "Toddling is: ";
-foreach $i ( 3 .. 4 ) {
-  print "$i ";
-}
-print "\n";
-print "Childhood is: ";
-for ( $i = 5 ; $i <= 12 ; $i++ ) {
-  print "$i ";
-}
-print "\n";
+# print "Infancy is: ";
+# foreach ( 0 .. 2 ) {
+#   print "$_ ";
+# }
+# print "\n";
+# print "Toddling is: ";
+# foreach $i ( 3 .. 4 ) {
+#   print "$i ";
+# }
+# print "\n";
+# print "Childhood is: ";
+# for ( $i = 5 ; $i <= 12 ; $i++ ) {
+#   print "$i ";
+# }
+# print "\n";
 
+# use Roman;
+# $roman_fifteen = roman(15);    # "xv"
+# print "Roman for fifteen is $roman_fifteen\n";
+# $arabic_fifteen = arabic($roman_fifteen);
+# print "Converted back, $roman_fifteen is $arabic_fifteen\n";
+#
+# use Time::localtime;
+# use Roman;
+# printf "The year is now %s\n", Roman( 1900 + localtime->year );
+#
+# use charnames ":full";
+# print "2003 is ", "\N{ROMAN NUMERAL ONE THOUSAND}" x 2,
+#   "\N{ROMAN NUMERAL THREE}\n";
+#
+# use Math::Roman qw(roman);
+# print $a = roman('I');    # I
+# print $a += 2000;         # MMI
+# print $a -= "III";        # MCMXCVIII
+# print $a -= "MCM";        # XCVIII
 
+$random = int( rand(51) ) + 25;
+print "$random\n";
+
+@chars    = ( "A" .. "Z", "a" .. "z", 0 .. 9, qw(! @ $ % ^ & *) );
+$password = join( "", @chars[ map { rand @chars } ( 1 .. 8 ) ] );
+print "$password\n";
