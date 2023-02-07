@@ -1,0 +1,1 @@
+{"version":5,"vars":[{"name":"Dump","line":1,"kind":2,"containerName":"Data"},{"line":3,"kind":2,"name":"utf8","containerName":""},{"containerName":null,"name":"%i","line":59,"kind":13},{"name":"$i","line":64,"kind":13,"containerName":null},{"containerName":null,"kind":13,"line":64,"name":"$i"},{"name":"%i","kind":13,"line":64,"containerName":null}]}

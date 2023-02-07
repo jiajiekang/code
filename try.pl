@@ -39,14 +39,32 @@ use utf8;
 # $b = 0.725;    # 725/1000, or 29/40
 # printf "%s is %.2f or %.30g\n", ($_) x 3 for $a, $b;
 
-for $n ( -4 .. +4 ) {
-  $n += 0.5;
-  printf "%4.1f %2.0f\n", $n, $n;
-}
+# for $n ( -4 .. +4 ) {
+#   $n += 0.5;
+#   printf "%4.1f %2.0f\n", $n, $n;
+# }
+#
+# use POSIX qw(floor ceil);
+# printf "%8s %8s %8s %8s %8s\n", qw(number even zero down up);
+# for $n ( -6 .. +6 ) {
+#   $n += 0.5;
+#   printf "%8g %8.0f %8s %8s %8s\n", $n, $n, int($n), floor($n), ceil($n);
+# }
 
-use POSIX qw(floor ceil);
-printf "%8s %8s %8s %8s %8s\n", qw(number even zero down up);
-for $n ( -6 .. +6 ) {
-  $n += 0.5;
-  printf "%8g %8.0f %8s %8s %8s\n", $n, $n, int($n), floor($n), ceil($n);
+print "Infancy is: ";
+foreach ( 0 .. 2 ) {
+  print "$_ ";
 }
+print "\n";
+print "Toddling is: ";
+foreach $i ( 3 .. 4 ) {
+  print "$i ";
+}
+print "\n";
+print "Childhood is: ";
+for ( $i = 5 ; $i <= 12 ; $i++ ) {
+  print "$i ";
+}
+print "\n";
+
+
