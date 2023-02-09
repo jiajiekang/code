@@ -87,9 +87,99 @@ use utf8;
 # print $a -= "III";        # MCMXCVIII
 # print $a -= "MCM";        # XCVIII
 
-$random = int( rand(51) ) + 25;
-print "$random\n";
+# $random = int( rand(51) ) + 25;
+# print "$random\n";
+#
+# @chars    = ( "A" .. "Z", "a" .. "z", 0 .. 9, qw(! @ $ % ^ & *) );
+# $password = join( "", @chars[ map { rand @chars } ( 1 .. 8 ) ] );
+# print "$password\n";
 
-@chars    = ( "A" .. "Z", "a" .. "z", 0 .. 9, qw(! @ $ % ^ & *) );
-$password = join( "", @chars[ map { rand @chars } ( 1 .. 8 ) ] );
-print "$password\n";
+# sub gaussian_rand {
+#   my ( $u1, $u2 );    # uniformly distributed random numbers
+#   my $w;              # variance, then a weight
+#   my ( $g1, $g2 );    # gaussian-distributed numbers
+#   do {
+#     $u1 = 2 * rand() - 1;
+#     $u2 = 2 * rand() - 1;
+#     $w  = $u1 * $u1 + $u2 * $u2;
+#   } while ( $w >= 1 || $w == 0 );
+#   $w  = sqrt( ( -2 * log($w) ) / $w );
+#   $g2 = $u1 * $w;
+#   $g1 = $u2 * $w;
+#
+#   # return both if wanted, else just one
+#   return wantarray ? ( $g1, $g2 ) : $g1;
+# }
+#
+# # weight_to_dist: takes a hash mapping key to weight and returns
+# # a hash mapping key to probability
+# sub weight_to_dist {
+#   my %weights = @_;
+#   my %dist    = ();
+#   my $total   = 0;
+#   my ( $key, $weight );
+#   local $_;
+#   foreach ( values %weights ) {
+#     $total += $_;
+#   }
+#   while ( ( $key, $weight ) = each %weights ) {
+#     $dist{$key} = $weight / $total;
+#   }
+#   return %dist;
+# }
+#
+# # weighted_rand: takes a hash mapping key to probability, and
+# # returns the corresponding element
+# sub weighted_rand {
+#   my %dist = @_;
+#   my ( $key, $weight );
+#   while (1) {    # to avoid floating point inaccuracies
+#     my $rand = rand;
+#     while ( ( $key, $weight ) = each %dist ) {
+#       return $key if ( $rand -= $weight ) < 0;
+#     }
+#   }
+# }
+#
+# $mean   = 25;
+# $sdev   = 2;
+# $salary = gaussian_rand() * $sdev + $mean;
+# printf( "You have been hired at \$%.2f\n", $salary );
+#
+# use Math::Random qw(random_normal);
+# $salary = random_normal( 1, $mean, $sdev );
+# printf( "You have been hired at \$%.2f\n", $salary );
+
+# $degrees = 30;
+# use Math::Trig;
+# $radians = deg2rad($degrees);
+# $degrees = rad2deg($radians);
+# print "$degrees: $radians\n";
+
+# sub log_base {
+#   my ( $base, $value ) = @_;
+#   return log($value) / log($base);
+# }
+# $answer = log_base( 10, 10_000 );
+# print "log10(10,000) = $answer\n";
+#
+# use Math::Complex;
+# printf "log2(1024) = %lf\n", logn( 1024, 2 );    # watch out for argument order!
+
+# use PDL;
+# $a = pdl [ [ 3, 2, 3 ], [ 5, 9, 8 ], ];
+# $b = pdl [ [ 4, 7 ], [ 9, 3 ], [ 8, 1 ], ];
+# $c = $a x $b;                                 # x overload
+# print $c;
+
+use Math::Complex;
+$a = Math::Complex->new( 3, 5 );    # or Math::Complex->new(3,5);
+$b = Math::Complex->new( 2, -2 );
+$c = $a * $b;
+print "c = $c\n";
+
+use Math::Complex;
+$c = cplx( 3, 5 ) * cplx( 2, -2 );    # easier on the eye
+$d = 3 + 4 * i;                       # 3 + 4i
+printf "sqrt($d) = %s\n", sqrt($d);
+
