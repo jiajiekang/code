@@ -172,14 +172,40 @@ use utf8;
 # $c = $a x $b;                                 # x overload
 # print $c;
 
-use Math::Complex;
-$a = Math::Complex->new( 3, 5 );    # or Math::Complex->new(3,5);
-$b = Math::Complex->new( 2, -2 );
-$c = $a * $b;
-print "c = $c\n";
+# use Math::Complex;
+# $a = Math::Complex->new( 3, 5 );    # or Math::Complex->new(3,5);
+# $b = Math::Complex->new( 2, -2 );
+# $c = $a * $b;
+# print "c = $c\n";
+#
+# use Math::Complex;
+# $c = cplx( 3, 5 ) * cplx( 2, -2 );    # easier on the eye
+# $d = 3 + 4 * i;                       # 3 + 4i
+# printf "sqrt($d) = %s\n", sqrt($d);
 
-use Math::Complex;
-$c = cplx( 3, 5 ) * cplx( 2, -2 );    # easier on the eye
-$d = 3 + 4 * i;                       # 3 + 4i
-printf "sqrt($d) = %s\n", sqrt($d);
+# print "Gimme an integer in decimal, binary, octal, or hex: ";
+# $num = <STDIN>;
+# chomp $num;
+# exit unless defined $num;
+# $num = oct($num) if $num =~ /^0/;    # catches 077 0b10 0x20
+# printf "%d %#x %#o %#b\n", ($num) x 4;
+
+# print "Enter file permission in octal: ";
+# $permissions = <STDIN>;
+# die "Exiting ...\n" unless defined $permissions;
+# chomp $permissions;
+# $permissions = oct($permissions);    # permissions always octal
+# print "The decimal value is $permissions\n";
+
+# sub commify {
+#   my $text = reverse $_[0];
+#   $text =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
+#   return scalar reverse $text;
+# }
+#
+# # more reasonable web counter :-)
+# use Math::TrulyRandom;
+# $hits   = truly_random_value();                                 # negative hits!
+# $output = "Your web page received $hits accesses last month.\n";
+# print commify($output);
 
