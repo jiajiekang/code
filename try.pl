@@ -73,3 +73,55 @@ use utf8;
 # ( $year, $month, $day ) = Add_Delta_Days( 1973, 1, 18, 55 );
 # print "Nat was 55 days old on: $month/$day/$year\n";
 
+# use Date::Calc qw(Delta_Days);
+# @bree       = ( 1981, 6, 16 );    # 16 Jun 1981
+# @nat        = ( 1973, 1, 18 );    # 18 Jan 1973
+# $difference = Delta_Days( @nat, @bree );
+# print "There were $difference days between Nat and Bree\n";
+#
+# use Date::Calc qw(Delta_DHMS);
+# @bree = ( 1981, 6, 16, 4, 35, 25 );    # 16 Jun 1981, 4:35:25
+# @nat  = ( 1973, 1, 18, 3, 45, 50 );    # 18 Jan 1973, 3:45:50
+# @diff = Delta_DHMS( @nat, @bree );
+# print "Bree came $diff[0] days, $diff[1]:$diff[2]:$diff[3] after Nat\n";
+
+# use Date::Calc qw(Day_of_Week Week_Number Day_of_Week_to_Text);
+# $year  = 1981;
+# $month = 6;                                    # (June)
+# $day   = 16;
+# $wday  = Day_of_Week( $year, $month, $day );
+# print "$month/$day/$year was a ", Day_of_Week_to_Text($wday), "\n";
+# ## see comment above
+# $wnum = Week_Number( $year, $month, $day );
+# print "in the $wnum week.\n";
+
+# use Date::Manip qw(ParseDate UnixDate);
+# while (<DATA>) {
+#   $date = ParseDate($_);
+#   if ( !$date ) {
+#     warn "Bad date string: $_\n";
+#     next;
+#   }
+#   else {
+#     ( $year, $month, $day ) = UnixDate( $date, "%Y", "%m", "%d" );
+#     print "Date was $month/$day/$year\n";
+#   }
+# }
+# __DATA__
+# Today
+# 2 weeks ago Friday
+
+# use Time::Local;
+# $time = timelocal( 50, 45, 3, 18, 0, 73 );
+# print "Scalar localtime gives: ", scalar( localtime($time) ), "\n";
+#
+# use POSIX qw(strftime);
+# use Time::Local;
+# $time = timelocal( 50, 45, 3, 18, 0, 73 );
+# print "strftime gives: ", strftime( "%A %D", localtime($time) ), "\n";
+#
+# use Date::Manip qw(ParseDate UnixDate);
+# $date    = ParseDate("18 Jan 1973, 3:45:50");
+# $datestr = UnixDate( $date, "%a %b %e %H:%M:%S %z %Y" );    # as scalar
+# print "Date::Manip gives: $datestr\n";
+
