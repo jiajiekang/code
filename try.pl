@@ -125,3 +125,43 @@ use utf8;
 # $datestr = UnixDate( $date, "%a %b %e %H:%M:%S %z %Y" );    # as scalar
 # print "Date::Manip gives: $datestr\n";
 
+# use Time::HiRes qw(gettimeofday);
+# print "Press return when ready: ";
+# $before  = gettimeofday();
+# $line    = <STDIN>;
+# $elapsed = gettimeofday() - $before;
+# print "You took $elapsed seconds.\n";
+
+# use Time::HiRes qw(gettimeofday);
+#
+# # take mean sorting time
+# $size            = 2000;
+# $number_of_times = 100;
+# $total_time      = 0;
+# for ( $i = 0 ; $i < $number_of_times ; $i++ ) {
+#   my ( @array, $j, $begin, $time );
+#
+#   # populate array
+#   @array = ();
+#   for ( $j = 0 ; $j < $size ; $j++ ) { push( @array, rand ) }
+#
+#   # sort it
+#   $begin = gettimeofday;
+#   @array = sort { $a <=> $b } @array;
+#   $time  = gettimeofday- $begin;
+#   $total_time += $time;
+# }
+# printf "On average, sorting %d random numbers takes %.5f seconds\n",
+#   $size, ( $total_time / $number_of_times );
+
+# while (<>) {
+#   select( undef, undef, undef, 0.25 );
+#   print;
+# }
+
+use Time::HiRes qw(sleep);
+while (<>) {
+  sleep(0.25);
+  print;
+}
+
