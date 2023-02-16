@@ -1,27 +1,22 @@
 #include <stdio.h>
 
-#define IN 1
 #define OUT 0
+#define IN 1
 
-int main(int argc, char *argv[]) {
-  int c, nl, nw, nc, state;
+int main(void) {
+  char c;
+  int state;
 
   state = OUT;
-  nl = nw = nc = 0;
-
   while ((c = getchar()) != EOF) {
-    ++nc;
-    if (c == '\n')
-      ++nl;
-    if (c == ' ' || c == '\n' || c == '\t')
-      state = OUT;
-    else if (state == OUT) {
+    if (c != ' ' && c != '\t' && c != '\n') {
+      putchar(c);
       state = IN;
-      ++nw;
+    } else if (state) {
+      putchar('\n');
+      state = OUT;
     }
   }
-
-  printf("%d %d %d\n", nl, nw, nc);
 
   return 0;
 }
