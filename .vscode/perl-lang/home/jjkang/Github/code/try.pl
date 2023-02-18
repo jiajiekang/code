@@ -1,1 +1,1 @@
-{"vars":[{"kind":2,"line":1,"name":"Dump","containerName":"Data"},{"name":"utf8","kind":2,"line":3,"containerName":""}],"version":5}
+{"vars":[{"kind":2,"line":1,"containerName":"Data","name":"Dump"},{"kind":2,"containerName":"","name":"utf8","line":3},{"line":5,"name":"$str","localvar":"my","containerName":null,"kind":13,"definition":"my"},{"name":"$str","containerName":null,"line":7,"kind":13}],"version":5}
