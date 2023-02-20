@@ -1,42 +1,64 @@
+
 #include <stdio.h>
 
-#define ALPHA_NR 26
-#define NUM_NR 10
+#define MAXLINE 1000
+
+int get_line(char line[], int max_line_len);
+int length(char line[]);
+void reverse(char line[]);
 
 int main(void) {
-  int i;
-  char chars_freq[ALPHA_NR + NUM_NR];
+  int len;
+  char line[MAXLINE];
 
-  // Initialize the chars_freq array with 0
-  for (i = 0; i < (ALPHA_NR + NUM_NR); ++i) {
-    chars_freq[i] = 0;
-  }
-
-  // Count characters from the standard input
-  char c;
-  while ((c = getchar()) != EOF) {
-    if (c >= 'a' && c <= 'z') {
-      ++chars_freq[c - 'a'];
-    } else if (c >= '0' && c <= '9') {
-      ++chars_freq[c - '0' + ALPHA_NR];
-    }
-  }
-
-  // Print horizontal histogram
-  for (i = 0; i < (ALPHA_NR + NUM_NR); ++i) {
-    if (i < ALPHA_NR) {
-      printf("%c: ", 'a' + i);
-    } else if (i >= ALPHA_NR) {
-      printf("%c: ", '0' + i - ALPHA_NR);
-    }
-
-    int j;
-    for (j = 0; j < chars_freq[i]; ++j) {
-      printf("#");
-    }
-
-    putchar('\n');
+  while ((len = get_line(line, MAXLINE)) > 0) {
+    reverse(line);
+    printf("%s", line);
   }
 
   return 0;
+}
+
+int get_line(char line[], int max_line_len) {
+  int c, i;
+
+  i = 0;
+  while (i < max_line_len - 1 && (c = getchar()) != EOF && c != '\n') {
+    line[i] = c;
+    ++i;
+  }
+
+  if (c == '\n') {
+    line[i] = '\n';
+    ++i;
+  }
+
+  line[i] = '\0';
+
+  return i;
+}
+
+int length(char line[]) {
+  int i;
+
+  for (i = 0; line[i] != '\0'; ++i)
+    ;
+
+  return i;
+}
+
+void reverse(char line[]) {
+  int i_front = 0;
+  int i_back = length(line);
+  char temp;
+
+  i_back -= 2;
+  while (i_back > i_front) {
+    temp = line[i_front];
+    line[i_front] = line[i_back];
+    line[i_back] = temp;
+
+    ++i_front;
+    --i_back;
+  }
 }

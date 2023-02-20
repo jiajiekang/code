@@ -42,3 +42,33 @@ use utf8;
 #     :               join( "$sepchar ", @_[ 0 .. ( $#_ - 1 ) ], "and $_[-1]" );
 # }
 
+# sub what_about_that_array {
+#   print "The array now has ", scalar(@people), " elements.\n";
+#   print "The index of the last element is $#people.\n";
+#   print "Element #3 is `$people[3]'.\n";
+# }
+# @people = qw(Crosby Stills Nash Young);
+# what_about_that_array();
+# $#people--;
+# what_about_that_array();
+
+# $#foo = 5;
+# @bar  = ( (undef) x 5 );
+# printf "foo element 3 is%s defined\n", defined $foo[3] ? "" : "n't";
+# printf "foo element 3 does%s exist\n", exists $foo[3]  ? "" : "n't";
+# printf "bar element 3 is%s defined\n", defined $bar[3] ? "" : "n't";
+# printf "bar element 3 does%s exist\n", exists $bar[3]  ? "" : "n't";
+
+# foreach $var ( sort keys %ENV ) {
+#   print "$var=$ENV{$var}\n";
+# }
+
+# @fruits    = ( "Apple", "Blackberry" );
+# $fruit_ref = \@fruits;
+# foreach $fruit (@$fruit_ref) {
+#   print "$fruit tastes good in a pie.\n";
+# }
+# for ( $i = 0 ; $i <= $#$fruit_ref ; $i++ ) {
+#   print "$fruit_ref->[$i] tastes good in a pie.\n";
+# }
+
