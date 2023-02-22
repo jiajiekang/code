@@ -1,64 +1,37 @@
-
 #include <stdio.h>
 
-#define MAXLINE 1000
-
-int get_line(char line[], int max_line_len);
-int length(char line[]);
-void reverse(char line[]);
+#define TAB_LENGTH 8
 
 int main(void) {
-  int len;
-  char line[MAXLINE];
+  int c;
+  unsigned int line_pos = 0;
+  unsigned int nr_of_spaces = 0;
 
-  while ((len = get_line(line, MAXLINE)) > 0) {
-    reverse(line);
-    printf("%s", line);
+  while ((c = getchar()) != EOF) {
+    ++line_pos;
+
+    if (c == ' ') {
+      ++nr_of_spaces;
+
+      if (line_pos % TAB_LENGTH == 0 && nr_of_spaces > 1) {
+        putchar('\t');
+        nr_of_spaces = 0;
+      }
+    } else {
+      while (nr_of_spaces) {
+        putchar(' ');
+        --nr_of_spaces;
+      }
+
+      if (c == '\n') {
+        line_pos = 0;
+      }
+
+      putchar(c);
+    }
   }
 
   return 0;
 }
 
-int get_line(char line[], int max_line_len) {
-  int c, i;
-
-  i = 0;
-  while (i < max_line_len - 1 && (c = getchar()) != EOF && c != '\n') {
-    line[i] = c;
-    ++i;
-  }
-
-  if (c == '\n') {
-    line[i] = '\n';
-    ++i;
-  }
-
-  line[i] = '\0';
-
-  return i;
-}
-
-int length(char line[]) {
-  int i;
-
-  for (i = 0; line[i] != '\0'; ++i)
-    ;
-
-  return i;
-}
-
-void reverse(char line[]) {
-  int i_front = 0;
-  int i_back = length(line);
-  char temp;
-
-  i_back -= 2;
-  while (i_back > i_front) {
-    temp = line[i_front];
-    line[i_front] = line[i_back];
-    line[i_back] = temp;
-
-    ++i_front;
-    --i_back;
-  }
-}
+// NOTE: run: ./entab < file_in.txt > file_out.txt

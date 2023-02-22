@@ -72,3 +72,42 @@ use utf8;
 #   print "$fruit_ref->[$i] tastes good in a pie.\n";
 # }
 
+# # generate a list of users logged in, removing duplicates
+# %ucnt = ();
+# for (`who`) {
+#   s/\s.*\n//;     # kill from first space till end-of-line, yielding username
+#   $ucnt{$_}++;    # record the presence of this user
+# }
+#
+# # extract and print unique keys
+# @users = sort keys %ucnt;
+# print "users logged in: @users\n";
+
+# @a     = ( 1, 3, 5, 6, 7, 8 );
+# @b     = ( 2, 3, 5, 7, 9 );
+# @union = @isect = @diff = ();
+# %union = %isect = ();
+# %count = ();
+#
+# foreach $e ( @a, @b ) { $union{$e}++ && $isect{$e}++ }
+# @union = keys %union;
+# @isect = keys %isect;
+#
+# @isect = @diff = @union = ();
+# foreach $e ( @a, @b ) { $count{$e}++ }
+# @union = keys %count;
+# foreach $e ( keys %count ) {
+#   push @{ $count{$e} == 2 ? \@isect : \@diff }, $e;
+# }
+#
+# print "union: @union, isect: @isect\n";
+
+# @members   = ( "Time", "Flies" );
+# @initiates = ( "An",   "Arrow" );
+#
+# splice( @members, 2, 0, "Like", @initiates );
+# print "@members\n";
+# splice( @members, 0, 1, "Fruit" );
+# splice( @members, -2, 2, "A", "Banana" );
+# print "@members\n";
+
