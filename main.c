@@ -1,82 +1,89 @@
 #include <stdio.h>
 
-#define MAXLINE 10000
+#define MAXSTR 10000
 
 #define TRUE (1 == 1)
 #define FALSE !TRUE
 
-#define BREAKING_POINT 40
-#define OFFSET 10
+// This is a test comment.
 
-int get_line(char line[], int max_line_len);
-void fold_line(char line[], char fold_str[], int n_break);
+int get_str(char str[], int limit); // This is another test comment.
+void remove_comments(char str[], char no_com_str[]);
 
 int main(void) {
-  char line[MAXLINE];
-  char fold_str[MAXLINE];
+  /**
+   * This is multiline
+   * block
+   * comment.
+   */
 
-  while ((get_line(line, MAXLINE)) > 0) {
-    fold_line(line, fold_str, BREAKING_POINT);
-    printf("%s", fold_str);
-  }
+  char str[MAXSTR];
+  char no_com_str[MAXSTR];
+
+  get_str(str, MAXSTR);
+
+  remove_comments(str, no_com_str);
+
+  printf("%s", no_com_str);
 
   return 0;
 }
 
-int get_line(char line[], int max_line_len) {
+int get_str(char str[], int limit) {
   int c, i = 0;
 
-  while (i < max_line_len - 1 && (c = getchar()) != EOF && c != '\n') {
-    line[i++] = c;
+  while (i < limit - 1 && (c = getchar()) != EOF) {
+    str[i++] = c;
   }
-
-  if (c == '\n') {
-    line[i++] = c;
-  }
-
-  line[i] = '\0';
+  str[i] = '\0';
 
   return i;
 }
 
-void fold_line(char line[], char fold_str[], int n_break) {
-  int i, j;
-  int column = 0;
-  int split = FALSE;
-  int last_blank = 0;
+void remove_comments(char str[], char no_com_str[]) {
+  int in_quote = FALSE;
+  int line_comment = FALSE;
+  int block_comment = FALSE;
 
-  for (i = 0, j = 0; line[i] != '\0'; ++i, ++j) {
-    fold_str[j] = line[i];
-
-    if (fold_str[j] == '\n') {
-      column = 0;
+  int i = 0, j = 0;
+  while (str[i] != '\0') {
+    if (!block_comment) {
+      if (!in_quote && str[i] == '"') {
+        in_quote = TRUE;
+      } else if (in_quote && str[i] == '"') {
+        in_quote = FALSE;
+      }
     }
 
-    column++;
-
-    if (column == n_break - OFFSET) {
-      split = TRUE;
-    }
-
-    if (split && (fold_str[j] == ' ' || fold_str[j] == '\t')) {
-      last_blank = j;
-    }
-
-    if (column == n_break) {
-      if (last_blank) {
-        fold_str[last_blank] = '\n';
-        column = j - last_blank;
-        last_blank = 0;
-      } else {
-        fold_str[j++] = '-';
-        fold_str[j] = '\n';
-
-        column = 0;
+    if (!in_quote) {
+      if (str[i] == '/' && str[i + 1] == '*' && !line_comment) {
+        block_comment = TRUE;
       }
 
-      split = FALSE;
+      if (str[i] == '*' && str[i + 1] == '/') {
+        block_comment = FALSE;
+        i += 2;
+      }
+
+      if (str[i] == '/' && str[i + 1] == '/') {
+        line_comment = TRUE;
+      }
+
+      if (str[i] == '\n') {
+        line_comment = FALSE;
+      }
+
+      if (line_comment || block_comment) {
+        ++i;
+      } else if (!line_comment || !block_comment) {
+        no_com_str[j++] = str[i++];
+      }
+    } else {
+      no_com_str[j++] = str[i++];
     }
   }
 
-  fold_str[j] = '\0';
+  no_com_str[j] = '\0';
 }
+
+// NOTE: run: ./c_remove_comments < c_remove_comments.c
