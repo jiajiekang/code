@@ -111,3 +111,24 @@ use utf8;
 # splice( @members, -2, 2, "A", "Banana" );
 # print "@members\n";
 
+# use User::pwent qw(getpwent);
+# @users = ();
+#
+# # fetch all users
+# while ( defined( $user = getpwent ) ) {
+#   push( @users, $user );
+# }
+# @users = sort { $a->name cmp $b->name } @users;
+# foreach $user (@users) {
+#   print $user->name, "\n";
+# }
+
+# print map { $_->[0] }    # whole line
+#   sort {
+#   $a->[1] <=> $b->[1]         # gid
+#     || $a->[2] <=> $b->[2]    # uid
+#     || $a->[3]
+#     cmp $b->[3]               # login
+#   }
+#   map { [ $_, ( split /:/ )[ 3, 2, 0 ] ] } `cat /etc/passwd`;
+
