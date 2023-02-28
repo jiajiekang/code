@@ -1,70 +1,32 @@
-#include <ctype.h>
-#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define MAXLINE 100
+#define MAXSTR 1000
 
-int get_line(char line[], int lim);
-int htoi(char hex[]);
+int any(char str1[], char str2[]);
 
 int main(void) {
-  char hex[MAXLINE];
+  char str1[MAXSTR] = "xxxabcabc";
+  char str2[MAXSTR] = "cbaa";
 
-  get_line(hex, MAXLINE);
-
-  printf("%d", htoi(hex));
+  printf("%d", any(str1, str2));
 
   return 0;
 }
 
-int get_line(char line[], int lim) {
-  char c;
-  int i = 0;
-  while (i < lim - 1 && (c = getchar()) != EOF && c != '\n') {
-    line[i++] = c;
+int any(char str1[], char str2[]) {
+  int i, j;
+  for (i = 0; str1[i] != '\0'; ++i) {
+    for (j = 0; str2[j] != '\0'; ++j) {
+      if (str1[i] == str2[j]) {
+        return i;
+      }
+    }
   }
 
-  line[i] = '\0';
-
-  return i;
+  return -1;
 }
 
-int htoi(char hex[]) {
-  int result = 0;
-
-  int i = 0, len = strlen(hex);
-
-  while (i < len) {
-    if (hex[i] == '0' && (hex[i + 1] == 'x' || hex[i + 1] == 'X')) {
-      i += 2;
-    }
-
-    int temp = tolower(hex[i]);
-
-    if (isdigit(temp)) {
-      temp -= 48;
-    }
-
-    if (isalpha(temp) && temp <= 'f') {
-      temp = temp - 'a' + 10;
-    }
-
-    if ((hex[i] >= '0' && hex[i] <= '9') || (hex[i] >= 'a' && hex[i] <= 'f') ||
-        (hex[i] >= 'A' && hex[i] <= 'F')) {
-      result += temp * (int)pow(16, len - i - 1);
-    } else {
-      printf("Error: Not a valid hex value.\n Try this format: 0xHHHH, where H "
-             "is a hex digit.\n");
-    }
-
-    ++i;
-  }
-
-  return result;
-}
-
-// NOTE: The conversion algorithm from hex to dec is very similar with the
-// conversion algorithm from bin to dec, but the base is not 2 but 16.
-// The general formula is: x1*B^N + x2*B^(N - 1) + ... + xn*B^(N - N), where B
-// is the base from we convert to dec, in this case B = 16.
+// NOTE: The standard library (string.h), cotains the function strpbrk which
+// returns a pointer to the location of the char from the first string.
