@@ -1,31 +1,55 @@
 #include <stdio.h>
+#include <math.h>
 
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c\n"
-#define BYTE_TO_BINARY(byte)                                                   \
-  (byte & 128 ? '1' : '0'), (byte & 64 ? '1' : '0'), (byte & 32 ? '1' : '0'),  \
-      (byte & 16 ? '1' : '0'), (byte & 8 ? '1' : '0'), (byte & 4 ? '1' : '0'), \
-      (byte & 2 ? '1' : '0'), (byte & 1 ? '1' : '0')
+void printbin(unsigned int x);
+unsigned int rightrot(unsigned int x, unsigned int n);
 
-unsigned int setbits(int x, int p, int n, int y);
+int main(void)
+{
+  unsigned int x = 0b11110101;
 
-int main(void) {
-  unsigned int x = 0b11111111;
-  unsigned int y = 0b0110;
-
-  printf(BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(x));
-  printf(BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(setbits(x, 2, 4, y)));
+  printbin(x);
+  printbin(rightrot(x, 5));
 
   return 0;
 }
 
-unsigned int setbits(int x, int p, int n, int y) {
-  ++p; // First position is 0
+void printbin(unsigned int x)
+{
+  unsigned int n = sizeof(unsigned int);
 
-  unsigned int mask1 = (~(~(~0 << n) << p) & x);
-  unsigned int mask2 = (~(~0 << n) & y) << p;
+  printf("0b");
 
-  return mask1 | mask2;
+  int i;
+  for (i = n * 8 - 1; i >= 0; --i)
+  {
+    (x & (unsigned int)pow(2, i)) ? putchar('1') : putchar('0');
+  }
+
+  putchar('\n');
 }
 
-// NOTE: Masking is a very good technique to work with bits. We can think about
-// logic AND as a multiply and for OR as an addition.
+unsigned int rightrot(unsigned int x, unsigned int n)
+{
+  unsigned int msb_1 = ~(~(unsigned)0 >> 1);
+
+  int i;
+  for (i = 0; i < n; ++i)
+  {
+    if (x & 1)
+    {
+      x = (x >> 1) | msb_1;
+    }
+    else
+    {
+      x = (x >> 1);
+    }
+  }
+
+  return x;
+}
+
+// NOTE: The rightrot function rotate the entire unsigned int var and if we print
+// just a byte we can't see all bits. In order to print all the bits from an
+// unsigned int we need to determine the size of an unsigned int, wich is
+// machine dependent, and then print 0 or 1 to the output using powers of 2.
