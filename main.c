@@ -1,176 +1,64 @@
+#include <ctype.h>
 #include <stdio.h>
 
-#define MAXLEN 1000
+#define MAXLEN 10000
 
-int get_line(char line[], unsigned int limit);
-void escape(char dest[], char src[]);
-void unescape(char dest[], char src[]);
+int get_str(char str[], int limit);
+void expand(char src[], char dest[]);
 
 int main(void) {
-  char src[MAXLEN];
-  char dest[MAXLEN];
+  char str[MAXLEN];
+  char expanded_str[MAXLEN];
 
-  get_line(src, MAXLEN);
-  printf("%s", src);
-
-  escape(dest, src);
-  printf("%s\n", dest);
-
-  unescape(dest, src);
-  printf("%s", dest);
+  get_str(str, MAXLEN);
+  expand(str, expanded_str);
+  printf("%s", expanded_str);
 
   return 0;
 }
 
-int get_line(char line[], unsigned int limit) {
-  int i, c;
-  for (i = 0; i < limit - 1 && (c = getchar()) != EOF && c != '\n'; ++i) {
-    line[i] = c;
-  }
+int get_str(char str[], int limit) {
+  int c, i = 0;
 
-  if (c == '\n') {
-    line[i++] = c;
+  while (i < limit - 1 && (c = getchar()) != EOF) {
+    str[i++] = c;
   }
-
-  line[i] = '\0';
+  str[i] = '\0';
 
   return i;
 }
 
-void escape(char dest[], char src[]) {
-  int i, j;
-  for (i = j = 0; src[i] != '\0'; ++i, ++j) {
-    switch (src[i]) {
-    case '\a':
-      dest[j++] = '\\';
-      dest[j] = 'a';
-      break;
+void expand(char src[], char dest[]) {
+  /**
+   * a-z
+   * a-b-c
+   * a-c-h-v
+   * a-c-b-v
+   * 0-9
+   * 1-5
+   * a-zA-Z
+   * 0-9a-zA-Z
+   * -a-z
+   * a-z-
+   * -a-z-
+   */
+  int i, j = 0;
+  for (i = 0; i < MAXLEN - 1 && j < MAXLEN - 1 && src[i] != EOF; ++i) {
+    if (isalnum(src[i]) && src[i + 1] == '-' && src[i] < src[i + 2]) {
+      do {
+        int k;
+        for (k = 0; k <= (src[i + 2] - src[i]); ++k) {
+          int temp = src[i] + k;
+          if (dest[j - 1] != temp && (isdigit(temp) || isalpha(temp))) {
+            dest[j++] = temp;
+          }
+        }
 
-    case '\b':
-      dest[j++] = '\\';
-      dest[j] = 'b';
-      break;
-
-    case '\f':
-      dest[j++] = '\\';
-      dest[j] = 'f';
-      break;
-
-    case '\n':
-      dest[j++] = '\\';
-      dest[j] = 'n';
-      break;
-
-    case '\r':
-      dest[j++] = '\\';
-      dest[j] = 'r';
-      break;
-
-    case '\t':
-      dest[j++] = '\\';
-      dest[j] = 't';
-      break;
-
-    case '\v':
-      dest[j++] = '\\';
-      dest[j] = 'n';
-      break;
-
-    case '\\':
-      dest[j++] = '\\';
-      dest[j] = '\\';
-      break;
-
-    case '\?':
-      dest[j++] = '\\';
-      dest[j] = '?';
-      break;
-
-    case '\'':
-      dest[j++] = '\\';
-      dest[j] = '\'';
-      break;
-
-    case '\"':
-      dest[j++] = '\\';
-      dest[j] = '"';
-      break;
-
-    default:
-      dest[j] = src[i];
-      break;
+        i += 2;
+      } while (isalnum(src[i]) && src[i + 1] == '-' && src[i] < src[i + 2]);
+    } else {
+      dest[j++] = src[i];
     }
   }
-
-  if (src[i] == '\0') {
-    dest[i] = src[i];
-  }
-}
-
-void unescape(char dest[], char src[]) {
-  int i, j;
-  for (i = j = 0; src[i] != '\0'; ++i, ++j) {
-    switch (src[i]) {
-    case '\\':
-      switch (src[++i]) {
-      case 'a':
-        dest[j] = '\a';
-        break;
-
-      case 'b':
-        dest[j] = '\b';
-        break;
-
-      case 'f':
-        dest[j] = '\f';
-        break;
-
-      case 'n':
-        dest[j] = '\n';
-        break;
-
-      case 'r':
-        dest[j] = '\r';
-        break;
-
-      case 't':
-        dest[j] = '\t';
-        break;
-
-      case 'v':
-        dest[j] = '\v';
-        break;
-
-      case '\\':
-        dest[j] = '\\';
-        break;
-
-      case '?':
-        dest[j] = '\?';
-        break;
-
-      case '\'':
-        dest[j] = '\'';
-        break;
-
-      case '"':
-        dest[j] = '\"';
-        break;
-
-      default:
-        dest[j++] = '\\';
-        dest[j] = src[i];
-        break;
-      }
-      break;
-
-    default:
-      dest[j] = src[i];
-      break;
-    }
-  }
-
-  if (src[i] == '\0') {
-    dest[i] = src[i];
-  }
+  dest[j] = '\0';
 }
