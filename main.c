@@ -1,67 +1,132 @@
-#include <limits.h>
+#include "calc.h"
+#include <math.h> // for fmod()
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> // for atof()
 #include <string.h>
 
-#define MAXLEN 1000
+#define MAXOP 100      // max size of operand or operator
+#define MAX_VAR_LEN 26 // max size of array for variables
 
-int ilen(int a);
-void int_to_array(int n, char s[], int padding);
-void str_reverse(char str1[], int index, int size);
+void mathfunc(char[]);
+void setVar(double, double);
+void getVar(char[]);
 
+double variables[MAX_VAR_LEN];
+int variableFlags[MAX_VAR_LEN]; // if [0] is 0, means 'a' not set, if [0] is 1,
+                                // means 'a' set
+
+// compile with stack.c, getop.c, getch.c
 int main(void) {
-  int n = 1995;
-  char number_str[MAXLEN];
+  int type;
+  double op2;
+  char s[MAXOP];
 
-  int_to_array(n, number_str, 6);
-  printf("%s\n", number_str);
+  int i;
 
+  for (i = 0; i < MAX_VAR_LEN; i++)
+    variableFlags[i] = 0;
+
+  while ((type = getop(s)) != EOF) {
+    switch (type) {
+    case NUMBER:
+      push(atof(s));
+      break;
+    case VAR:
+      getVar(s);
+      break;
+    case FUNC:
+      mathfunc(s);
+      break;
+    case '+':
+      push(pop() + pop());
+      break;
+    case '*':
+      push(pop() * pop());
+      break;
+    case '-':
+      op2 = pop();
+      push(pop() - op2);
+      break;
+    case '/':
+      op2 = pop();
+      if (op2 != 0.0)
+        push(pop() / op2);
+      else
+        printf("error: zero divisor\n");
+      break;
+    case '%':
+      op2 = pop();
+      if (op2 == 0.0)
+        printf("error: can not mod 0\n");
+      else
+        push(fmod(pop(), op2));
+      break;
+    case '=':
+      op2 = pop();
+      setVar(pop(), op2);
+      break;
+    case '\n':
+      printf("\t%.8g\n", pop());
+      break;
+    default:
+      printf("error: unknown command %s\n", s);
+      break;
+    }
+  }
   return 0;
 }
 
-int ilen(int a) {
-  int i = 0;
-
-  do {
-    ++i;
-  } while (a /= 10);
-
-  return i;
-}
-
-void int_to_array(int n, char s[], int padding) {
-  int i = 0, sign = n;
-
-  do {
-    s[i++] = abs(n % 10) + '0';
-  } while (n /= 10);
-
-  if (sign < 0) {
-    s[i++] = '-';
-  }
-
-  int len = ilen(sign);
-  while (len < padding) {
-    s[i++] = ' ';
-    -- padding;
-  }
-
-  s[i] = '\0';
-
-  int s_len = strlen(s);
-  str_reverse(s, 0, s_len - 1);
-}
-
-void str_reverse(char str1[], int index, int size) {
-  char temp;
-
-  temp = str1[index];
-  str1[index] = str1[size - index];
-  str1[size - index] = temp;
-
-  if (index == size / 2) {
+void mathfunc(char s[]) {
+  int strrindex(char[], char[]);
+  int index;
+  if (0 == strrindex(s, "sin")) {
+    push(sin(pop()));
     return;
   }
 
-  str_reverse(str1, index + 1, size);
+  if (0 == strrindex(s, "exp")) {
+    push(exp(pop()));
+    return;
+  }
+
+  if (0 == strrindex(s, "pow")) {
+    double ey = pop();
+    push(pow(pop(), ey));
+    return;
+  }
+
+  printf("error: unknown func %s\n", s);
+  return;
+}
+
+void setVar(double varIndex, double value) {
+  int index = (int)varIndex;
+  if (index < 0 || index > MAX_VAR_LEN) {
+    printf("error: cannot set variable, invalid variable: %c\n", index + 'a');
+    return;
+  }
+
+  variables[index] = value;
+  variableFlags[index] = 1;
+
+  push(value); // to show result
+
+  return;
+}
+
+void getVar(char s[]) {
+  if (strlen(s) != 1 && s[0] != 0) {
+    // if variable is 'a', s[0] == 0, strlen(s) == 0
+    printf("error: cannot get variable, invalid variable: %s\n", s);
+    return;
+  }
+
+  double value = atof(s);
+  int index = (int)value;
+  if (variableFlags[index] == 0)
+    push(value);
+  else
+    push(variables[index]);
+
+  return;
 }

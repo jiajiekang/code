@@ -63,3 +63,22 @@ use utf8;
 #   print "Failed!\n";
 # }
 
+# use locale;
+# use POSIX 'locale_h';
+# $name = "andreas k\xF6nig";
+# @locale{qw(German English)} = qw(zh_CN.UTF-8 en_US.UTF-8);
+# setlocale( LC_CTYPE, $locale{English} )
+#   or die "Invalid locale $locale{English}";
+# @english_names = ();
+# while ( $name =~ /\b(\w+)\b/g ) {
+#   push( @english_names, ucfirst($1) );
+# }
+# setlocale( LC_CTYPE, $locale{German} )
+#   or die "Invalid locale $locale{German}";
+# @german_names = ();
+# while ( $name =~ /\b(\w+)\b/g ) {
+#   push( @german_names, ucfirst($1) );
+# }
+# print "English names: @english_names\n";
+# print "German names: @german_names\n";
+
