@@ -118,3 +118,50 @@ use utf8;
 # /\b(\w+)/g;
 # print "Next full word after position 42 is $1\n";
 
+# $_ = "BEGIN1 BEGIN2 BEGIN3 3END 2END 1END";
+# if (
+#   m{
+# BEGIN # locate initial portion
+# ( # save this group into $1
+# (?: # non-capturing group
+# (?! BEGIN ) # can't be at a BEGIN
+# (?! END ) # also can't be at an END
+# . # finally, match any one char
+# ) * # repeat entire group ad libitum
+# ) # end $1 capture
+# END
+# }sx
+#   )
+# {
+#   say $1;
+# }
+
+# $/ = '';    # paragrep mode
+# while (<DATA>) {
+#   while (
+#     m{
+# \b # start at a word boundary (begin letters)
+# (\S+) # find chunk of non-whitespace
+# \b # until another word boundary (end letters)
+# (
+# \s+ # separated by some whitespace
+# \1 # and that very same chunk again
+# \b # until another word boundary
+# ) + # one or more sets of those
+# }xig
+#     )
+#   {
+#     print "dup word '$1' at paragraph $.\n";
+#   }
+# }
+#
+# __DATA__
+# This is Is a test
+# test of the doubled word finder.
+
+# $string = q("I can't see this," she remarked.);
+# @a      = $string =~ /\b\S+\b/g;
+# @b      = $string =~ /\S+/g;
+# print "@a\n";
+# say "@b";
+
