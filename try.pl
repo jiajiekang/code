@@ -82,3 +82,39 @@ use utf8;
 # print "English names: @english_names\n";
 # print "German names: @german_names\n";
 
+# use String::Approx qw(amatch);
+#
+# open( DICT, "/usr/share/dict/words" ) or die "Can't open dict: $!";
+#
+# while (<DICT>) {
+#   print if amatch("balast");
+# }
+
+# $n = "   49 here";
+# $n =~ s/\G /0/g;
+# print $n;
+#
+# $_ = "The year 1752 lost 10 days on the 3rd of September";
+# while (/(\d+)/gc) {
+#   print "Found number $1\n";
+# }
+#
+# # the /c above left pos at end of final match
+# if (/\G(\S+)/g) {
+#   print "Found $1 right after the last number.\n";
+# }
+#
+# $a = "Didst thou think that the eyes of the White Tower were blind?";
+# $a =~ /(\w{5,})/g;
+# print "Got $1, position in \$a is ", pos($a), "\n";
+# pos($a) = 30;
+# $a =~ /(\w{5,})/g;
+# print "Got $1, position in \$a now ", pos($a), "\n";
+#
+# $_ = "Nay, I have seen more than thou knowest, Grey Fool.";
+# /(\w{5,})/g;
+# print "Got $1, position in \$_ is ", pos, "\n";
+# pos = 42;
+# /\b(\w+)/g;
+# print "Next full word after position 42 is $1\n";
+

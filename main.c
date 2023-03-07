@@ -1,132 +1,300 @@
-#include "calc.h"
-#include <math.h> // for fmod()
 #include <stdio.h>
-#include <stdlib.h> // for atof()
-#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <math.h>
 
-#define MAXOP 100      // max size of operand or operator
-#define MAX_VAR_LEN 26 // max size of array for variables
+#define MAXOP 100
+#define MAXVAL 100
+#define BUFFSIZE 100
+#define MAXLEN 1000
+#define NUMBER '0'
 
-void mathfunc(char[]);
-void setVar(double, double);
-void getVar(char[]);
+#define VARSET '_'
+#define VARGET 'a'
+#define VARNUM 26
 
-double variables[MAX_VAR_LEN];
-int variableFlags[MAX_VAR_LEN]; // if [0] is 0, means 'a' not set, if [0] is 1,
-                                // means 'a' set
+enum boolean
+{
+  FALSE,
+  TRUE
+};
 
-// compile with stack.c, getop.c, getch.c
-int main(void) {
+int get_line(char line[], unsigned int max_line_len);
+int getop(char[]);
+
+void push(double f);
+double pop(void);
+int is_empty(void);
+void view_head(void);
+void duplicate(void);
+void swap(void);
+void clear(void);
+
+char var = '0';
+char line[MAXLEN];
+int line_i = 0;
+
+int main(void)
+{
   int type;
   double op2;
   char s[MAXOP];
 
-  int i;
+  int varindex = 0;
+  double var_buff[VARNUM];
 
-  for (i = 0; i < MAX_VAR_LEN; i++)
-    variableFlags[i] = 0;
+  while (get_line(line, MAXLEN) != 0)
+  {
+    line_i = 0;
+    while ((type = getop(s)) != '\0')
+    {
+      switch (type)
+      {
+      case NUMBER:
+        push(atof(s));
+        break;
 
-  while ((type = getop(s)) != EOF) {
-    switch (type) {
-    case NUMBER:
-      push(atof(s));
-      break;
-    case VAR:
-      getVar(s);
-      break;
-    case FUNC:
-      mathfunc(s);
-      break;
-    case '+':
-      push(pop() + pop());
-      break;
-    case '*':
-      push(pop() * pop());
-      break;
-    case '-':
-      op2 = pop();
-      push(pop() - op2);
-      break;
-    case '/':
-      op2 = pop();
-      if (op2 != 0.0)
-        push(pop() / op2);
-      else
-        printf("error: zero divisor\n");
-      break;
-    case '%':
-      op2 = pop();
-      if (op2 == 0.0)
-        printf("error: can not mod 0\n");
-      else
-        push(fmod(pop(), op2));
-      break;
-    case '=':
-      op2 = pop();
-      setVar(pop(), op2);
-      break;
-    case '\n':
-      printf("\t%.8g\n", pop());
-      break;
-    default:
-      printf("error: unknown command %s\n", s);
-      break;
+      case '+':
+        push(pop() + pop());
+        break;
+
+      case '-':
+        op2 = pop();
+        push(pop() - op2);
+        break;
+
+      case '*':
+        push(pop() * pop());
+        break;
+
+      case '/':
+        op2 = pop();
+
+        if (op2 != 0.0)
+        {
+          push(pop() / op2);
+        }
+        else
+        {
+          printf("Error: zero divisor.\n");
+        }
+
+        break;
+
+      case '%':
+        op2 = pop();
+
+        if (op2 != 0.0)
+        {
+          push((int)pop() % (int)op2);
+        }
+        else
+        {
+          printf("Error: zero divisor.\n");
+        }
+        break;
+
+      case '^':
+        op2 = pop();
+        push(pow(pop(), op2));
+        break;
+
+      case '~':
+        push(sin(pop()));
+        break;
+
+      case 'e':
+        push(exp(pop()));
+        break;
+
+      case 'h':
+        view_head();
+        break;
+
+      case 'd':
+        duplicate();
+        break;
+
+      case 's':
+        swap();
+        break;
+
+      case 'c':
+        clear();
+        break;
+
+      case VARSET:
+        var_buff[varindex++] = pop();
+        printf("variable %c: %.3f\n", 'a' + varindex - 1, var_buff[varindex - 1]);
+        break;
+
+      case VARGET:
+        push(var_buff[var - 'a']);
+        break;
+
+      case '\n':
+        if (!is_empty())
+        {
+          printf("result: %.8g\n", pop());
+        }
+        break;
+
+      default:
+        printf("Error: unknown command %s.\n", s);
+        break;
+      }
     }
   }
+
   return 0;
 }
 
-void mathfunc(char s[]) {
-  int strrindex(char[], char[]);
-  int index;
-  if (0 == strrindex(s, "sin")) {
-    push(sin(pop()));
-    return;
+int sp = 0;
+double stack[MAXVAL];
+
+void push(double f)
+{
+  if (sp < MAXVAL)
+  {
+    stack[sp++] = f;
   }
-
-  if (0 == strrindex(s, "exp")) {
-    push(exp(pop()));
-    return;
-  }
-
-  if (0 == strrindex(s, "pow")) {
-    double ey = pop();
-    push(pow(pop(), ey));
-    return;
-  }
-
-  printf("error: unknown func %s\n", s);
-  return;
-}
-
-void setVar(double varIndex, double value) {
-  int index = (int)varIndex;
-  if (index < 0 || index > MAX_VAR_LEN) {
-    printf("error: cannot set variable, invalid variable: %c\n", index + 'a');
-    return;
-  }
-
-  variables[index] = value;
-  variableFlags[index] = 1;
-
-  push(value); // to show result
-
-  return;
-}
-
-void getVar(char s[]) {
-  if (strlen(s) != 1 && s[0] != 0) {
-    // if variable is 'a', s[0] == 0, strlen(s) == 0
-    printf("error: cannot get variable, invalid variable: %s\n", s);
-    return;
-  }
-
-  double value = atof(s);
-  int index = (int)value;
-  if (variableFlags[index] == 0)
-    push(value);
   else
-    push(variables[index]);
+  {
+    printf("Error: stack full.\n");
+  }
+}
 
-  return;
+double pop(void)
+{
+  if (sp > 0)
+  {
+    return stack[--sp];
+  }
+  else
+  {
+    printf("Error: stack empty.\n");
+  }
+
+  return 0.0;
+}
+
+int is_empty(void)
+{
+  if (sp > 0)
+  {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+void view_head(void)
+{
+  if (sp)
+  {
+    printf("stack_head: %g\n", stack[sp - 1]);
+  }
+  else
+  {
+    printf("Error: stack empty.\n");
+  }
+}
+
+void duplicate(void)
+{
+  double temp = pop();
+  push(temp);
+  push(temp);
+}
+
+void swap(void)
+{
+  double temp1 = pop();
+  double temp2 = pop();
+
+  push(temp1);
+  push(temp2);
+}
+
+void clear(void)
+{
+  do
+  {
+    stack[sp] = 0.0;
+  } while (sp--);
+}
+
+int get_line(char line[], unsigned int max_line_len)
+{
+  int c, i;
+
+  for (i = 0; i < max_line_len - 1 && (c = getchar()) != EOF && c != '\n'; ++i)
+  {
+    line[i] = c;
+  }
+
+  if (c == '\n')
+  {
+    line[i] = c;
+    ++i;
+  }
+
+  line[i] = '\0';
+
+  return i;
+}
+
+int getop(char s[])
+{
+  int i = 0, c;
+
+  while ((s[0] = c = line[line_i++]) == ' ' || c == '\t')
+    ;
+
+  s[1] = '\0';
+
+  if (isalpha(c))
+  {
+    var = c;
+    return VARGET;
+  }
+
+  if (!isdigit(c) && c != '.' && c != '-')
+  {
+    return c;
+  }
+
+  if (c == '-')
+  {
+    int next = line[line_i++];
+    if (!isdigit(next) && next != '.')
+    {
+      return next;
+    }
+
+    s[i] = c;
+    c = next;
+    --line_i;
+  }
+  else
+  {
+    c = line[line_i++];
+  }
+
+  if (isdigit(c))
+  {
+    while (isdigit(s[++i] = c = line[line_i++]))
+      ;
+  }
+
+  if (c == '.')
+  {
+    while (isdigit(s[++i] = c = line[line_i++]))
+      ;
+  }
+
+  --line_i;
+
+  return NUMBER;
 }
