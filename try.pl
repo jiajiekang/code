@@ -165,6 +165,7 @@ use utf8;
 # print "@a\n";
 # say "@b";
 
+<<<<<<< HEAD
 # use Regexp::Common;
 # $text = "myfunfun(1,(2*(3+4)),5)";
 # if ( $text =~ /(\w+\s*$RE{balanced}{-parens=>'( )'})/o ) {
@@ -188,3 +189,13 @@ use utf8;
 #   print "Action is $action\n";
 # }
 
+||||||| 5df0a55
+=======
+$a = 'nobody';
+$b = 'bodysnatcher';
+if ( "$a $b" =~ /^(\w+)(\w+) \2(\w+)$/ ) {
+  print "$2 overlaps in $1-$2-$3\n";
+}
+
+
+>>>>>>> refs/remotes/origin/main
