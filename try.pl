@@ -165,3 +165,26 @@ use utf8;
 # print "@a\n";
 # say "@b";
 
+# use Regexp::Common;
+# $text = "myfunfun(1,(2*(3+4)),5)";
+# if ( $text =~ /(\w+\s*$RE{balanced}{-parens=>'( )'})/o ) {
+#   print "Got function call: $1\n";
+# }
+#
+# use Text::Balanced qw/extract_bracketed/;
+# $text = "myfunfun(1,(2*(3+4)),5)";
+# if ( ( $before, $found, $after ) = extract_bracketed( $text, "(" ) ) {
+#   print "answer is $found\n";
+# }
+# else {
+#   print "FAILED\n";
+# }
+
+# use Text::Abbrev;
+# $href = abbrev qw(send abort list edit);
+# for ( print "Action: " ; <> ; print "Action: " ) {
+#   chomp;
+#   my $action = $href->{ lc($_) };
+#   print "Action is $action\n";
+# }
+
